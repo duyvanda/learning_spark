@@ -1,0 +1,648 @@
+1
+00:00:00,000 --> 00:00:00,940
+<v Instructor>All right.</v>
+
+2
+00:00:00,940 --> 00:00:03,520
+So let's have a look at my solution for handling
+
+3
+00:00:03,520 --> 00:00:05,690
+that real estate data there, and trying to predict
+
+4
+00:00:05,690 --> 00:00:08,430
+the value of a house per unit area,
+
+5
+00:00:08,430 --> 00:00:10,790
+just based on the age of the house,
+
+6
+00:00:10,790 --> 00:00:12,392
+the distance of public transportation,
+
+7
+00:00:12,392 --> 00:00:14,240
+and the number of convenience stores.
+
+8
+00:00:14,240 --> 00:00:17,253
+So let's walk through my code here, and compare it to yours.
+
+9
+00:00:18,110 --> 00:00:20,810
+So we start off with our usual stuff of importing stuff.
+
+10
+00:00:20,810 --> 00:00:21,910
+There is an extra line here
+
+11
+00:00:21,910 --> 00:00:23,380
+that I haven't really used before.
+
+12
+00:00:23,380 --> 00:00:25,270
+That's just making sure that I have some backward
+
+13
+00:00:25,270 --> 00:00:27,790
+compatibility with a print function between Python three,
+
+14
+00:00:27,790 --> 00:00:31,200
+and Python two, but you don't don't necessarily need that.
+
+15
+00:00:31,200 --> 00:00:33,850
+Another thing you don't necessarily need is this line here.
+
+16
+00:00:33,850 --> 00:00:35,330
+If name equals main,
+
+17
+00:00:35,330 --> 00:00:36,810
+that's just there to protect this script
+
+18
+00:00:36,810 --> 00:00:38,610
+from if you were to run it from outside of a different
+
+19
+00:00:38,610 --> 00:00:41,270
+context than just running it as a standalone script.
+
+20
+00:00:41,270 --> 00:00:43,323
+So just a little bit of safety there that you,
+
+21
+00:00:43,323 --> 00:00:46,420
+just a good practice to include, but you don't need to.
+
+22
+00:00:46,420 --> 00:00:48,950
+Beyond that it's mostly what you've seen before.
+
+23
+00:00:48,950 --> 00:00:50,800
+So we start off by creating a Spark session
+
+24
+00:00:50,800 --> 00:00:53,600
+with a given app name, and we get our created.
+
+25
+00:00:53,600 --> 00:00:55,130
+We then load up our Dataframe.
+
+26
+00:00:55,130 --> 00:00:56,840
+So again, we have a header row here,
+
+27
+00:00:56,840 --> 00:00:58,930
+so we're just gonna use it, and load our data directly
+
+28
+00:00:58,930 --> 00:01:01,580
+into a Dataframe as opposed to an RDD here.
+
+29
+00:01:01,580 --> 00:01:04,288
+We'll just say spark.read.option header true.option
+
+30
+00:01:04,288 --> 00:01:06,790
+inferschema true, and it will just figure out
+
+31
+00:01:06,790 --> 00:01:10,030
+what that schema is, and convert that into a Dataframe,
+
+32
+00:01:10,030 --> 00:01:11,460
+after reading that data in from
+
+33
+00:01:11,460 --> 00:01:14,710
+the SparkCourse/realestate.CSV file.
+
+34
+00:01:14,710 --> 00:01:16,820
+And as always be sure to change that path,
+
+35
+00:01:16,820 --> 00:01:18,510
+if it's different for you.
+
+36
+00:01:18,510 --> 00:01:20,200
+Next we need to massage our data
+
+37
+00:01:20,200 --> 00:01:22,380
+into the format that our model expects.
+
+38
+00:01:22,380 --> 00:01:24,200
+And like I mentioned in the slides,
+
+39
+00:01:24,200 --> 00:01:25,862
+the easiest way to do this is actually by using
+
+40
+00:01:25,862 --> 00:01:28,840
+a VectorAssembler which we have imported up here with
+
+41
+00:01:28,840 --> 00:01:32,337
+pyspark.ml.feature import VectorAssembler.
+
+42
+00:01:32,337 --> 00:01:34,278
+We just construct a new VectorAssembler object,
+
+43
+00:01:34,278 --> 00:01:36,930
+and we set the names of the input columns
+
+44
+00:01:36,930 --> 00:01:39,100
+to this list of column names.
+
+45
+00:01:39,100 --> 00:01:42,760
+So our features will be the house age, the distance to MRT,
+
+46
+00:01:42,760 --> 00:01:44,970
+and the number convenience stores columns.
+
+47
+00:01:44,970 --> 00:01:47,120
+And then furthermore, we set the output column,
+
+48
+00:01:47,120 --> 00:01:49,493
+our label, if you will, to features.
+
+49
+00:01:50,400 --> 00:01:52,400
+And then we just use that assembler,
+
+50
+00:01:52,400 --> 00:01:55,010
+and pass in our data with the transform function.
+
+51
+00:01:55,010 --> 00:01:58,410
+So that we'll actually construct that vector of feature data
+
+52
+00:01:58,410 --> 00:02:00,150
+along with our output column as well.
+
+53
+00:02:00,150 --> 00:02:02,300
+And we will select price of unit area,
+
+54
+00:02:02,300 --> 00:02:04,820
+which is going to be our label column and features,
+
+55
+00:02:04,820 --> 00:02:07,970
+which will contain that vector of feature data.
+
+56
+00:02:07,970 --> 00:02:09,410
+All right, so now that we have that,
+
+57
+00:02:09,410 --> 00:02:10,730
+we can split our data into training
+
+58
+00:02:10,730 --> 00:02:13,160
+and testing data, if you want to, if you skip that,
+
+59
+00:02:13,160 --> 00:02:15,620
+that's okay I'll, I'll overlook that,
+
+60
+00:02:15,620 --> 00:02:17,260
+but we've seen that before.
+
+61
+00:02:17,260 --> 00:02:19,900
+So now we construct our decision tree regressor model,
+
+62
+00:02:19,900 --> 00:02:22,010
+and we tell it what the name of our features column is
+
+63
+00:02:22,010 --> 00:02:23,260
+it's called features,
+
+64
+00:02:23,260 --> 00:02:24,900
+and what the name of our label column is,
+
+65
+00:02:24,900 --> 00:02:26,370
+which is price of unit area.
+
+66
+00:02:26,370 --> 00:02:29,290
+Again, label is the thing we're trying to predict,
+
+67
+00:02:29,290 --> 00:02:31,440
+and features are the attributes that we are using
+
+68
+00:02:31,440 --> 00:02:33,830
+to try to make that prediction from.
+
+69
+00:02:33,830 --> 00:02:35,230
+Once we have that model defined,
+
+70
+00:02:35,230 --> 00:02:37,110
+we can fit it using our training data
+
+71
+00:02:37,110 --> 00:02:39,736
+by passing in the training Dataframe that we constructed
+
+72
+00:02:39,736 --> 00:02:43,212
+from that random split of our original Dataframe.
+
+73
+00:02:43,212 --> 00:02:45,304
+And we just say DTR, that's our
+
+74
+00:02:45,304 --> 00:02:48,820
+DecisionTreeRegressor model.fit, passing that training data,
+
+75
+00:02:48,820 --> 00:02:51,070
+and that one line of code we'll train
+
+76
+00:02:51,070 --> 00:02:54,020
+our decision tree model using that set of training data.
+
+77
+00:02:54,020 --> 00:02:55,083
+Very simple, right?
+
+78
+00:02:56,080 --> 00:02:57,587
+All right, so now that we have our model trained,
+
+79
+00:02:57,587 --> 00:02:59,490
+we can use it to make predictions.
+
+80
+00:02:59,490 --> 00:03:03,578
+We will call a model.transform passing in our test data,
+
+81
+00:03:03,578 --> 00:03:05,500
+and then we'll catch those results,
+
+82
+00:03:05,500 --> 00:03:06,860
+and call it full predictions.
+
+83
+00:03:06,860 --> 00:03:10,680
+So now we have a set of predictions for our test Dataset
+
+84
+00:03:10,680 --> 00:03:13,300
+of what our model says the price of unit area
+
+85
+00:03:13,300 --> 00:03:17,120
+should be given the house age, distance to MRT,
+
+86
+00:03:17,120 --> 00:03:20,550
+and number of convenience stores in that test Dataset.
+
+87
+00:03:20,550 --> 00:03:22,760
+So now we can extract both the predictions,
+
+88
+00:03:22,760 --> 00:03:25,112
+and the correct labels so we can print them out,
+
+89
+00:03:25,112 --> 00:03:26,630
+and compare them to each other.
+
+90
+00:03:26,630 --> 00:03:29,200
+This is kind of similar to the previous script.
+
+91
+00:03:29,200 --> 00:03:31,340
+So in this one, we're just going to convert it back
+
+92
+00:03:31,340 --> 00:03:33,170
+to an RDD to make that a little bit simpler
+
+93
+00:03:33,170 --> 00:03:35,420
+because extracting data out of a Dataframe
+
+94
+00:03:35,420 --> 00:03:36,885
+can get a little bit complicated.
+
+95
+00:03:36,885 --> 00:03:38,930
+RDD's are a little bit easier
+
+96
+00:03:38,930 --> 00:03:40,890
+to deal with from that standpoint.
+
+97
+00:03:40,890 --> 00:03:43,880
+So we extract our predictions from the prediction column,
+
+98
+00:03:43,880 --> 00:03:45,860
+and we extract our labels from the price
+
+99
+00:03:45,860 --> 00:03:48,490
+of unit area column, and we can compare the two.
+
+100
+00:03:48,490 --> 00:03:50,619
+So we zip them together based on the labels,
+
+101
+00:03:50,619 --> 00:03:52,590
+collect them back to our script,
+
+102
+00:03:52,590 --> 00:03:54,897
+and we iterate through each prediction and print them out.
+
+103
+00:03:54,897 --> 00:03:57,594
+When we're done we stop the session, and we're done.
+
+104
+00:03:57,594 --> 00:03:58,940
+Now again in the real world,
+
+105
+00:03:58,940 --> 00:04:00,670
+you probably wouldn't just be printing out
+
+106
+00:04:00,670 --> 00:04:02,200
+the original and predictive values.
+
+107
+00:04:02,200 --> 00:04:03,599
+You'd probably be comparing them together
+
+108
+00:04:03,599 --> 00:04:05,280
+on a more mathematical basis.
+
+109
+00:04:05,280 --> 00:04:08,040
+But again, this is not a machine learning course.
+
+110
+00:04:08,040 --> 00:04:09,470
+So I'm going to spare you all that
+
+111
+00:04:09,470 --> 00:04:11,320
+because I don't want to befuddle you too much
+
+112
+00:04:11,320 --> 00:04:13,070
+if that's not what you're here for.
+
+113
+00:04:13,070 --> 00:04:14,650
+let's run it and see what happens.
+
+114
+00:04:14,650 --> 00:04:15,780
+So I'll change my directory
+
+115
+00:04:15,780 --> 00:04:17,763
+to where my course materials are.
+
+116
+00:04:20,220 --> 00:04:22,490
+And we'll kick that off with
+
+117
+00:04:22,490 --> 00:04:25,990
+C spark bin sparked dash submit.
+
+118
+00:04:25,990 --> 00:04:29,290
+And the name of this script is realestate. PY.
+
+119
+00:04:29,290 --> 00:04:30,590
+Off it goes.
+
+120
+00:04:30,590 --> 00:04:33,280
+As always, it'll take a few seconds to spin up,
+
+121
+00:04:33,280 --> 00:04:36,040
+but once it does, it should make short work of this data.
+
+122
+00:04:36,040 --> 00:04:39,023
+It's not a very big Dataset, so it's not too challenging.
+
+123
+00:04:45,530 --> 00:04:48,090
+I do find decision trees fascinating as an aside,
+
+124
+00:04:48,090 --> 00:04:51,780
+they have to really understand what entropy really means
+
+125
+00:04:51,780 --> 00:04:53,600
+in order to understand how a decision tree works.
+
+126
+00:04:53,600 --> 00:04:55,640
+And that's kind of a cool insight to have.
+
+127
+00:04:55,640 --> 00:04:58,470
+But I digress, we have results. Let's look at them.
+
+128
+00:04:58,470 --> 00:05:01,143
+So it's kind of a mixed bag as before, you know.
+
+129
+00:05:04,240 --> 00:05:05,110
+Well, I mean, look at this one,
+
+130
+00:05:05,110 --> 00:05:07,747
+like the actual prediction was 39,
+
+131
+00:05:07,747 --> 00:05:11,580
+the real value was 61.5, 22 versus 62.
+
+132
+00:05:11,580 --> 00:05:12,640
+These aren't great results.
+
+133
+00:05:12,640 --> 00:05:14,180
+I don't think just by eyeballing it.
+
+134
+00:05:14,180 --> 00:05:17,240
+Again, there are a mathematical ways of measuring precisely
+
+135
+00:05:17,240 --> 00:05:20,585
+just how good this model is, but just by looking at it,
+
+136
+00:05:20,585 --> 00:05:23,320
+sometimes it did all right, sometimes not so much.
+
+137
+00:05:23,320 --> 00:05:24,960
+I'm sure there's a lot more that goes into the value
+
+138
+00:05:24,960 --> 00:05:26,780
+of a house than just how far it is
+
+139
+00:05:26,780 --> 00:05:28,370
+to the nearest transport station,
+
+140
+00:05:28,370 --> 00:05:31,010
+and how many convenience stores are nearby.
+
+141
+00:05:31,010 --> 00:05:32,770
+Those are probably interesting signals,
+
+142
+00:05:32,770 --> 00:05:35,489
+but clearly it's not enough to really describe the problem,
+
+143
+00:05:35,489 --> 00:05:37,260
+but the important thing is that it worked.
+
+144
+00:05:37,260 --> 00:05:38,900
+So there you have an example
+
+145
+00:05:38,900 --> 00:05:41,140
+of using a decision tree in Apache Spark.
+
+146
+00:05:41,140 --> 00:05:41,973
+And again, the cool thing is that
+
+147
+00:05:41,973 --> 00:05:44,047
+you could apply this to a massive Dataset,
+
+148
+00:05:44,047 --> 00:05:46,970
+and crunch that across an entire cluster.
+
+149
+00:05:46,970 --> 00:05:49,080
+Like I said, these entries are kind of cool these days.
+
+150
+00:05:49,080 --> 00:05:51,920
+Although the results here were kind of lackluster,
+
+151
+00:05:51,920 --> 00:05:53,490
+they can produce really good results
+
+152
+00:05:53,490 --> 00:05:54,740
+in a very simple manner.
+
+153
+00:05:54,740 --> 00:05:58,290
+And again, it saves you all the trouble of trying to scale
+
+154
+00:05:58,290 --> 00:06:00,210
+all that data down because it actually deals
+
+155
+00:06:00,210 --> 00:06:03,830
+with feature data in different scales pretty well.
+
+156
+00:06:03,830 --> 00:06:05,210
+So there you have it,
+
+157
+00:06:05,210 --> 00:06:07,810
+Spark ML, and you had a little exercise there
+
+158
+00:06:07,810 --> 00:06:09,210
+to get some practice with it.
+
+159
+00:06:09,210 --> 00:06:10,547
+Hope you got your feet wet with machine learning,
+
+160
+00:06:10,547 --> 00:06:12,640
+and how to use it in Apache Spark.
+
+161
+00:06:12,640 --> 00:06:15,180
+It's a very powerful capability that spark offers.
+
+162
+00:06:15,180 --> 00:06:17,883
+So remember, it's there, it's a good tool to have.
+

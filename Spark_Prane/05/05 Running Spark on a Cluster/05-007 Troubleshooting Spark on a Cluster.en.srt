@@ -1,0 +1,455 @@
+1
+00:00:00,950 --> 00:00:04,930
+Let's start talking about what to do when things go wrong with our spark job.
+
+2
+00:00:04,960 --> 00:00:07,870
+It has a Web based console that we can look at in some circumstances.
+
+3
+00:00:07,880 --> 00:00:13,560
+So let's look at that first let's talk a little bit about troubleshooting spark jobs on a cluster and
+
+4
+00:00:13,650 --> 00:00:15,330
+you know honestly it's a little bit of a dark art.
+
+5
+00:00:15,330 --> 00:00:21,060
+I mean usually if it's not immediately obvious from the output of the spark driver script what's going
+
+6
+00:00:21,060 --> 00:00:21,760
+on.
+
+7
+00:00:21,760 --> 00:00:25,620
+A lot of times what you end up doing is just throwing more machines out it throwing more memory at it.
+
+8
+00:00:25,620 --> 00:00:30,270
+You know like we looked at with the executor memory option there.
+
+9
+00:00:30,450 --> 00:00:34,800
+But if you're running on your own cluster at least two or one that you have within your own network
+
+10
+00:00:34,850 --> 00:00:41,400
+SPARC does offer a console UI that runs by default on Port 40 40 and it does give you a little bit more
+
+11
+00:00:41,400 --> 00:00:47,640
+of a graphical in-depth look as to what's going on in a way to access the logs and see what executor
+
+12
+00:00:47,640 --> 00:00:48,580
+is doing what.
+
+13
+00:00:48,620 --> 00:00:53,460
+And that can be helpful in understanding what's happening now unfortunately an elastic map reduces pretty
+
+14
+00:00:53,460 --> 00:01:00,030
+much next to impossible to actually connect to Spark's UI console from outside of Amazon's network.
+
+15
+00:01:00,030 --> 00:01:04,260
+But if you have your own your own cluster running on your own network it might be a good option for
+
+16
+00:01:04,260 --> 00:01:04,410
+you.
+
+17
+00:01:04,410 --> 00:01:10,200
+So just so you see what it looks like in case you end up using a spa cluster that's run by your employer
+
+18
+00:01:10,230 --> 00:01:13,740
+or something where you do have access to the console.
+
+19
+00:01:13,740 --> 00:01:18,690
+Let's take a look at it just running on our local machine So we'll kick off a larger similarities build
+
+20
+00:01:18,810 --> 00:01:22,130
+script and take a peek at it see what it looks like.
+
+21
+00:01:22,140 --> 00:01:24,670
+So real quick let me show you the spark UI.
+
+22
+00:01:24,720 --> 00:01:30,420
+The console if you ever need it if you're running on a if you have local network access to your master
+
+23
+00:01:30,420 --> 00:01:33,770
+node on your cluster then you should be able to access this on Port 40 40.
+
+24
+00:01:33,780 --> 00:01:40,020
+So we kick off a script that takes at least a minute here our original movie similarity script here
+
+25
+00:01:40,020 --> 00:01:46,090
+on my desktop and we'll kick that off and as soon as that starts I can open a browser and navigate to
+
+26
+00:01:46,090 --> 00:01:53,340
+a local host colon 40 40 to open up port 40 40 my computer and you can see here we have this display
+
+27
+00:01:53,340 --> 00:01:57,480
+of any active jobs currently running and we can click through on that to drill in and see some cool
+
+28
+00:01:57,480 --> 00:01:57,870
+stuff.
+
+29
+00:01:57,870 --> 00:02:03,190
+We have the international visualization of the directed a civic graph that spark used.
+
+30
+00:02:03,330 --> 00:02:07,860
+We have a timeline here that we can use for troubleshooting where all the time is being spent in our
+
+31
+00:02:07,860 --> 00:02:08,820
+job for example.
+
+32
+00:02:08,850 --> 00:02:14,010
+So we could click on one of these and get more details on that stage and you can just drill down there
+
+33
+00:02:14,010 --> 00:02:18,300
+and try to figure out what's taking all the time and what you might need to optimize what I might need
+
+34
+00:02:18,300 --> 00:02:19,770
+to be partition better.
+
+35
+00:02:19,920 --> 00:02:24,540
+Now the useful thing is the environment tab here which tells you all the various passing dependencies
+
+36
+00:02:24,540 --> 00:02:26,370
+and software versions that are installed.
+
+37
+00:02:26,370 --> 00:02:31,290
+So if you're running on a cluster that you don't necessarily have direct control over that can be useful
+
+38
+00:02:31,290 --> 00:02:32,840
+information.
+
+39
+00:02:33,060 --> 00:02:35,070
+And I think our job already finished.
+
+40
+00:02:35,070 --> 00:02:42,580
+But I pretty much showed you everything we can kick it off again just to go through it again so executors
+
+41
+00:02:44,290 --> 00:02:49,360
+actually shows individual executors and you can drill into thread dumps and actually see what's going
+
+42
+00:02:49,360 --> 00:02:52,810
+on here in as much depth as you want to
+
+43
+00:02:55,940 --> 00:02:59,960
+the stage is tab also shows you details on each individual stage running.
+
+44
+00:02:59,960 --> 00:03:04,050
+So yeah if you need to get more insight into where your spark job is that where it might be stuck at
+
+45
+00:03:04,070 --> 00:03:07,850
+and things you might need to optimize this gives you all the information you might need.
+
+46
+00:03:07,850 --> 00:03:09,900
+So it's actually pretty slick.
+
+47
+00:03:10,010 --> 00:03:13,180
+There you have it.
+
+48
+00:03:13,340 --> 00:03:16,910
+And there you have the spark console as I mentioned.
+
+49
+00:03:16,910 --> 00:03:20,140
+It's hard to get to on EMR though that might change in the future.
+
+50
+00:03:20,270 --> 00:03:21,010
+And I hope it does.
+
+51
+00:03:21,020 --> 00:03:25,580
+But if you're running on another cluster that you have more direct access to or even within your own
+
+52
+00:03:25,580 --> 00:03:30,230
+network it's a good way to figure out what's going on and get a good sense of how long different steps
+
+53
+00:03:30,230 --> 00:03:31,950
+are taking.
+
+54
+00:03:31,960 --> 00:03:35,710
+You can also just watch the output of your driver's script to get a good sense of what's going on as
+
+55
+00:03:35,710 --> 00:03:36,000
+well.
+
+56
+00:03:36,010 --> 00:03:41,440
+But obviously the UI will give you a better sense of what's happening under the hood let's talk about
+
+57
+00:03:41,440 --> 00:03:43,090
+some more troubleshooting tips next.
+
+58
+00:00:00,950 --> 00:00:04,930
+Let's start talking about what to do when things go wrong with our spark job.
+
+59
+00:00:04,960 --> 00:00:07,870
+It has a web based console that we can look at in some circumstances.
+
+60
+00:00:07,880 --> 00:00:13,560
+So let's look at that first. Let's talk a little bit about troubleshooting spark jobs on a cluster, and
+
+61
+00:00:13,650 --> 00:00:15,330
+you know honestly, it's a little bit of a dark art.
+
+62
+00:00:15,330 --> 00:00:21,060
+I mean usually if it's not immediately obvious from the output of the spark driver script what's going
+
+63
+00:00:21,060 --> 00:00:21,760
+on,
+
+64
+00:00:21,760 --> 00:00:25,620
+a lot of times what you end up doing is just throwing more machines out it throwing more memory at it.
+
+65
+00:00:25,620 --> 00:00:30,270
+You know like we looked at with the executor memory option there.
+
+66
+00:00:30,450 --> 00:00:34,800
+But if you're running on your own cluster at least, or one that you have within your own network
+
+67
+00:00:34,850 --> 00:00:41,400
+Spark does offer a console UI that runs by default on Port 40 40, and it does give you a little bit more
+
+68
+00:00:41,400 --> 00:00:47,640
+of a graphical in-depth look as to what's going on, in a way to access the logs and see what executor
+
+69
+00:00:47,640 --> 00:00:48,580
+is doing what.
+
+70
+00:00:48,620 --> 00:00:53,460
+And that can be helpful in understanding what's happening now. Unfortunately an elastic map reduces pretty
+
+71
+00:00:53,460 --> 00:01:00,030
+much next to impossible to actually connect to Spark's UI console from outside of Amazon's network.
+
+72
+00:01:00,030 --> 00:01:04,260
+But if you have your own cluster running on your own network, it might be a good option for
+
+73
+00:01:04,260 --> 00:01:04,410
+you.
+
+74
+00:01:04,410 --> 00:01:10,200
+So just so you see what it looks like in case you end up using a spark cluster that's run by your employer
+
+75
+00:01:10,230 --> 00:01:13,740
+or something where you do have access to the console.
+
+76
+00:01:13,740 --> 00:01:18,690
+Let's take a look at it just running on our local machine. So we'll kick off a larger similarities build
+
+77
+00:01:18,810 --> 00:01:22,130
+script and take a peek at it see what it looks like.
+
+78
+00:01:22,140 --> 00:01:24,670
+So real quick let me show you the Spark UI.
+
+79
+00:01:24,720 --> 00:01:30,420
+The console if you ever need it if you're running on a if you have local network access to your master
+
+80
+00:01:30,420 --> 00:01:33,770
+node on your cluster then you should be able to access this on Port 40 40.
+
+81
+00:01:33,780 --> 00:01:40,020
+So we kick off a script that takes at least a minute here our original movie similarity script here
+
+82
+00:01:40,020 --> 00:01:46,090
+on my desktop and we'll kick that off and as soon as that starts I can open a browser and navigate to
+
+83
+00:01:46,090 --> 00:01:53,340
+a local host colon 40 40 to open up port 40 40 my computer and you can see here we have this display
+
+84
+00:01:53,340 --> 00:01:57,480
+of any active jobs currently running and we can click through on that to drill in and see some cool
+
+85
+00:01:57,480 --> 00:01:57,870
+stuff.
+
+86
+00:01:57,870 --> 00:02:03,190
+We have the international visualization of the directed a civic graph that spark used.
+
+87
+00:02:03,330 --> 00:02:07,860
+We have a timeline here that we can use for troubleshooting where all the time is being spent in our
+
+88
+00:02:07,860 --> 00:02:08,820
+job for example.
+
+89
+00:02:08,850 --> 00:02:14,010
+So we could click on one of these and get more details on that stage and you can just drill down there
+
+90
+00:02:14,010 --> 00:02:18,300
+and try to figure out what's taking all the time and what you might need to optimize what I might need
+
+91
+00:02:18,300 --> 00:02:19,770
+to be partition better.
+
+92
+00:02:19,920 --> 00:02:24,540
+Now the useful thing is the environment tab here which tells you all the various passing dependencies
+
+93
+00:02:24,540 --> 00:02:26,370
+and software versions that are installed.
+
+94
+00:02:26,370 --> 00:02:31,290
+So if you're running on a cluster that you don't necessarily have direct control over that can be useful
+
+95
+00:02:31,290 --> 00:02:32,840
+information.
+
+96
+00:02:33,060 --> 00:02:35,070
+And I think our job already finished.
+
+97
+00:02:35,070 --> 00:02:42,580
+But I pretty much showed you everything we can kick it off again just to go through it again so executors
+
+98
+00:02:44,290 --> 00:02:49,360
+actually shows individual executors and you can drill into thread dumps and actually see what's going
+
+99
+00:02:49,360 --> 00:02:52,810
+on here in as much depth as you want to
+
+100
+00:02:55,940 --> 00:02:59,960
+the stage is tab also shows you details on each individual stage running.
+
+101
+00:02:59,960 --> 00:03:04,050
+So yeah if you need to get more insight into where your spark job is that where it might be stuck at
+
+102
+00:03:04,070 --> 00:03:07,850
+and things you might need to optimize this gives you all the information you might need.
+
+103
+00:03:07,850 --> 00:03:09,900
+So it's actually pretty slick.
+
+104
+00:03:10,010 --> 00:03:13,180
+There you have it.
+
+105
+00:03:13,340 --> 00:03:16,910
+And there you have the spark console as I mentioned.
+
+106
+00:03:16,910 --> 00:03:20,140
+It's hard to get to on EMR though that might change in the future.
+
+107
+00:03:20,270 --> 00:03:21,010
+And I hope it does.
+
+108
+00:03:21,020 --> 00:03:25,580
+But if you're running on another cluster that you have more direct access to or even within your own
+
+109
+00:03:25,580 --> 00:03:30,230
+network it's a good way to figure out what's going on and get a good sense of how long different steps
+
+110
+00:03:30,230 --> 00:03:31,950
+are taking.
+
+111
+00:03:31,960 --> 00:03:35,710
+You can also just watch the output of your driver's script to get a good sense of what's going on as
+
+112
+00:03:35,710 --> 00:03:36,000
+well.
+
+113
+00:03:36,010 --> 00:03:41,440
+But obviously the UI will give you a better sense of what's happening under the hood let's talk about
+
+114
+00:03:41,440 --> 00:03:43,090
+some more troubleshooting tips next.

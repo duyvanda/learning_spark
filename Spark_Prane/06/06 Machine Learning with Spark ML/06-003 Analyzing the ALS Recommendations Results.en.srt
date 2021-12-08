@@ -1,0 +1,492 @@
+1
+00:00:00,840 --> 00:00:03,180
+<v ->All right, so it finished and it didn't take too long.</v>
+
+2
+00:00:03,180 --> 00:00:04,280
+And we have some results here,
+
+3
+00:00:04,280 --> 00:00:06,810
+for my fictitious user ID zero who remember,
+
+4
+00:00:06,810 --> 00:00:09,270
+loves star Wars and hates gone with the wind.
+
+5
+00:00:09,270 --> 00:00:12,650
+And these are the recommendations it came up with.
+
+6
+00:00:12,650 --> 00:00:15,410
+Now I don't know if you're familiar with these movies,
+
+7
+00:00:15,410 --> 00:00:16,510
+I'm certainly not though.
+
+8
+00:00:16,510 --> 00:00:18,590
+And to me these strike me is just terrible,
+
+9
+00:00:18,590 --> 00:00:20,620
+terrible, terrible recommendations.
+
+10
+00:00:20,620 --> 00:00:22,520
+What do these have to do with science fiction?
+
+11
+00:00:22,520 --> 00:00:23,870
+Nothing as far as I can tell,
+
+12
+00:00:23,870 --> 00:00:25,220
+these could have just been,
+
+13
+00:00:25,220 --> 00:00:26,300
+chosen at random.
+
+14
+00:00:26,300 --> 00:00:27,300
+What went wrong here?
+
+15
+00:00:27,300 --> 00:00:29,360
+Like it is extremely confident,
+
+16
+00:00:29,360 --> 00:00:32,210
+that I'm going to love the movie Mina Tannenbaum.
+
+17
+00:00:32,210 --> 00:00:34,210
+Now, to be fair I've never heard of that movie,
+
+18
+00:00:34,210 --> 00:00:35,082
+maybe it's awesome,
+
+19
+00:00:35,082 --> 00:00:36,840
+let's look it up.
+
+20
+00:00:36,840 --> 00:00:38,750
+So I used to work for MDB.
+
+21
+00:00:38,750 --> 00:00:39,763
+Let's check our MDB.
+
+22
+00:00:40,740 --> 00:00:42,340
+This film tells a story of two girls
+
+23
+00:00:42,340 --> 00:00:43,560
+who have totally different character.
+
+24
+00:00:43,560 --> 00:00:44,500
+They know each other since their childhood,
+
+25
+00:00:44,500 --> 00:00:46,560
+this has nothing to do with anything,
+
+26
+00:00:46,560 --> 00:00:49,490
+that is even remotely related to star wars.
+
+27
+00:00:49,490 --> 00:00:50,560
+What the heck.
+
+28
+00:00:50,560 --> 00:00:51,690
+So what went wrong here?
+
+29
+00:00:51,690 --> 00:00:55,250
+Well we can see that this algorithm was easy to use,
+
+30
+00:00:55,250 --> 00:00:56,340
+but for our dataset,
+
+31
+00:00:56,340 --> 00:00:58,010
+for the ML 100 K dataset,
+
+32
+00:00:58,010 --> 00:01:00,400
+it's not producing very good results at all.
+
+33
+00:01:00,400 --> 00:01:02,803
+Let's talk a little bit about why that might be.
+
+34
+00:01:05,510 --> 00:01:06,690
+So what happened here?
+
+35
+00:01:06,690 --> 00:01:09,220
+Well, first of all we didn't put a whole lot of effort
+
+36
+00:01:09,220 --> 00:01:11,110
+into finding those right hyperparameters.
+
+37
+00:01:11,110 --> 00:01:11,943
+And like I said,
+
+38
+00:01:11,943 --> 00:01:13,810
+we could use a train test framework
+
+39
+00:01:13,810 --> 00:01:15,870
+to evaluate the performance of various
+
+40
+00:01:15,870 --> 00:01:17,710
+permutations of those hyperparameters,
+
+41
+00:01:17,710 --> 00:01:19,560
+those maxlterations and,
+
+42
+00:01:19,560 --> 00:01:21,760
+regularization parameters and whatnot.
+
+43
+00:01:21,760 --> 00:01:25,350
+And it is possible to measure the accuracy
+
+44
+00:01:25,350 --> 00:01:26,450
+of those rating predictions.
+
+45
+00:01:26,450 --> 00:01:28,350
+If you happen to predict a movie,
+
+46
+00:01:28,350 --> 00:01:29,930
+that somebody in your test,
+
+47
+00:01:29,930 --> 00:01:31,940
+data set already watched and rated,
+
+48
+00:01:31,940 --> 00:01:33,350
+then you can get a measure of whether or not
+
+49
+00:01:33,350 --> 00:01:34,840
+you're actually reading that person's mind
+
+50
+00:01:34,840 --> 00:01:36,180
+effectively or not.
+
+51
+00:01:36,180 --> 00:01:39,520
+But this gets really difficult with recommender systems
+
+52
+00:01:39,520 --> 00:01:41,960
+because it's what we call a sparse data problem.
+
+53
+00:01:41,960 --> 00:01:44,000
+The vast majority of movies have not been seen
+
+54
+00:01:44,000 --> 00:01:45,370
+by most people so,
+
+55
+00:01:45,370 --> 00:01:47,320
+you can't really evaluate whether your prediction
+
+56
+00:01:47,320 --> 00:01:49,970
+for a movie rating is a good one or not in most cases.
+
+57
+00:01:49,970 --> 00:01:52,960
+So it's kind of hard to say, what is a good recommendation.
+
+58
+00:01:52,960 --> 00:01:54,680
+Sometimes you have to start with more of a
+
+59
+00:01:54,680 --> 00:01:57,590
+qualitative assessment which is what we just did there.
+
+60
+00:01:57,590 --> 00:02:00,330
+But I have tried different hyperparameters,
+
+61
+00:02:00,330 --> 00:02:02,410
+I've tried normalizing the ratings,
+
+62
+00:02:02,410 --> 00:02:04,270
+I've tried everything I could think of,
+
+63
+00:02:04,270 --> 00:02:06,740
+to try to get better results out of that algorithm
+
+64
+00:02:06,740 --> 00:02:08,780
+and nothing really works.
+
+65
+00:02:08,780 --> 00:02:11,600
+Honestly I'm not convinced it's working properly internally.
+
+66
+00:02:11,600 --> 00:02:13,140
+I think there might be a bug in it somewhere
+
+67
+00:02:13,140 --> 00:02:14,370
+because it's that bad.
+
+68
+00:02:14,370 --> 00:02:15,970
+And the lesson here is,
+
+69
+00:02:15,970 --> 00:02:17,300
+putting your faith in a black box
+
+70
+00:02:17,300 --> 00:02:19,270
+is sometimes a dodgy thing to do.
+
+71
+00:02:19,270 --> 00:02:21,930
+So make sure that if you're gonna be using a
+
+72
+00:02:21,930 --> 00:02:24,920
+black box algorithm like spark ALS implementation,
+
+73
+00:02:24,920 --> 00:02:27,500
+you're evaluating the results before you bet the firm on it
+
+74
+00:02:27,500 --> 00:02:29,630
+before you actually put that in production
+
+75
+00:02:29,630 --> 00:02:32,100
+and stake your reputation on its results
+
+76
+00:02:32,100 --> 00:02:33,750
+or your business for that matter.
+
+77
+00:02:35,220 --> 00:02:36,730
+Ironically we got much better results
+
+78
+00:02:36,730 --> 00:02:39,350
+just using our homegrown collaborative filtering
+
+79
+00:02:39,350 --> 00:02:40,990
+example earlier in the course,
+
+80
+00:02:40,990 --> 00:02:43,190
+that produced much better recommendations.
+
+81
+00:02:43,190 --> 00:02:45,480
+Where we just took a more straightforward approach of
+
+82
+00:02:45,480 --> 00:02:48,170
+finding similar movies to movies each user liked.
+
+83
+00:02:48,170 --> 00:02:49,710
+So another lesson here is that,
+
+84
+00:02:49,710 --> 00:02:51,760
+complicated isn't always better.
+
+85
+00:02:51,760 --> 00:02:54,360
+Alternating these squares is a pretty fancy algorithm,
+
+86
+00:02:54,360 --> 00:02:56,760
+that really depends on having more data than we gave it.
+
+87
+00:02:56,760 --> 00:02:59,790
+I think that's the fundamental issue here.
+
+88
+00:02:59,790 --> 00:03:01,330
+But complicated isn't always better.
+
+89
+00:03:01,330 --> 00:03:03,010
+You know our simpler approach earlier in the course
+
+90
+00:03:03,010 --> 00:03:04,940
+was able to produce good results
+
+91
+00:03:04,940 --> 00:03:07,200
+even with this smaller dataset.
+
+92
+00:03:07,200 --> 00:03:08,860
+So never blindly trust your results
+
+93
+00:03:08,860 --> 00:03:10,400
+when you're analyzing big data,
+
+94
+00:03:10,400 --> 00:03:12,970
+small problems and algorithms can become bigger ones,
+
+95
+00:03:12,970 --> 00:03:14,840
+but often it's the quality of your input data,
+
+96
+00:03:14,840 --> 00:03:16,260
+that's the real issue.
+
+97
+00:03:16,260 --> 00:03:18,080
+I think you'll find that if you were to give
+
+98
+00:03:18,080 --> 00:03:19,860
+the ALS algorithm more data,
+
+99
+00:03:19,860 --> 00:03:20,870
+it would perform better.
+
+100
+00:03:20,870 --> 00:03:22,660
+I think this data sets its just,
+
+101
+00:03:22,660 --> 00:03:24,240
+too small for it to work with.
+
+102
+00:03:24,240 --> 00:03:26,770
+It's trying to find gradients in there that
+
+103
+00:03:26,770 --> 00:03:28,860
+there's just not enough data,
+
+104
+00:03:28,860 --> 00:03:31,280
+to find those gradients to begin with.
+
+105
+00:03:31,280 --> 00:03:32,840
+So that explains,
+
+106
+00:03:32,840 --> 00:03:34,040
+maybe a little bit of why we got
+
+107
+00:03:34,040 --> 00:03:35,870
+disappointing results from ALS there.
+
+108
+00:03:35,870 --> 00:03:39,160
+Again on larger situations using real data,
+
+109
+00:03:39,160 --> 00:03:40,240
+you might get better results,
+
+110
+00:03:40,240 --> 00:03:42,150
+but for the ML 100 K data set
+
+111
+00:03:42,150 --> 00:03:43,760
+this is not the best algorithm.
+
+112
+00:03:43,760 --> 00:03:46,680
+And again, the problem with ML in spark
+
+113
+00:03:46,680 --> 00:03:49,150
+is that you don't have a lot of algorithms to choose from.
+
+114
+00:03:49,150 --> 00:03:51,260
+That's not because they're lazy,
+
+115
+00:03:51,260 --> 00:03:53,270
+it's because there's only so many algorithms
+
+116
+00:03:53,270 --> 00:03:54,870
+that can be parallelized really.
+
+117
+00:03:55,880 --> 00:03:57,640
+Spark.ML though is really useful,
+
+118
+00:03:57,640 --> 00:03:59,040
+so don't let this get you down.
+
+119
+00:03:59,040 --> 00:04:01,280
+Let's go ahead and proceed to an example,
+
+120
+00:04:01,280 --> 00:04:03,630
+using something that machine learning is
+
+121
+00:04:03,630 --> 00:04:05,330
+more successful with,
+
+122
+00:04:05,330 --> 00:04:07,580
+linear regression we shouldn't be able to mess that up.
+
+123
+00:04:07,580 --> 00:04:11,113
+So let's move forward and redeem the value of Spark.ML.
+

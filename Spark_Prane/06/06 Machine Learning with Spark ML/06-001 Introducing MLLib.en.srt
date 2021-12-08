@@ -1,0 +1,1327 @@
+1
+00:00:00,990 --> 00:00:01,823
+<v Instructor>So let's introduce</v>
+
+2
+00:00:01,823 --> 00:00:03,490
+Spark's machine learning library,
+
+3
+00:00:03,490 --> 00:00:05,990
+which has the creative name of ML
+
+4
+00:00:05,990 --> 00:00:07,240
+and to illustrate its usage,
+
+5
+00:00:07,240 --> 00:00:09,460
+we'll actually generate some movie recommendations
+
+6
+00:00:09,460 --> 00:00:13,300
+using it's a built in recommendation algorithm called ALS.
+
+7
+00:00:13,300 --> 00:00:15,240
+So a little bit about ML at a higher level.
+
+8
+00:00:15,240 --> 00:00:16,870
+It has a lot of capabilities.
+
+9
+00:00:16,870 --> 00:00:19,380
+You are limited to the algorithms
+
+10
+00:00:19,380 --> 00:00:20,500
+that provides out of the box,
+
+11
+00:00:20,500 --> 00:00:22,820
+but it's a pretty wide set of algorithms.
+
+12
+00:00:22,820 --> 00:00:24,570
+So for pretty much anything you'd wanna do,
+
+13
+00:00:24,570 --> 00:00:28,170
+short of neural networks, it's probably in there.
+
+14
+00:00:28,170 --> 00:00:30,960
+We have a Term Frequency and Inverse Document Frequency.
+
+15
+00:00:30,960 --> 00:00:32,230
+So if you're building a search engine,
+
+16
+00:00:32,230 --> 00:00:34,280
+that's a useful capability to have.
+
+17
+00:00:34,280 --> 00:00:37,880
+It has some basic statistical functions you can apply.
+
+18
+00:00:37,880 --> 00:00:40,190
+It can do regressions, both linear and logistics.
+
+19
+00:00:40,190 --> 00:00:42,410
+So whether you need to predict a number
+
+20
+00:00:42,410 --> 00:00:44,850
+or a category or a true false kind of a thing,
+
+21
+00:00:44,850 --> 00:00:46,370
+it can apply regression model
+
+22
+00:00:46,370 --> 00:00:48,430
+and sometimes simple models like that
+
+23
+00:00:48,430 --> 00:00:50,890
+are all you need for fancier stuff.
+
+24
+00:00:50,890 --> 00:00:52,760
+It has support vector machines.
+
+25
+00:00:52,760 --> 00:00:53,593
+Naive Bayes.
+
+26
+00:00:53,593 --> 00:00:54,890
+You know, you see that in a lot of
+
+27
+00:00:54,890 --> 00:00:57,420
+spam classifying examples out there.
+
+28
+00:00:57,420 --> 00:00:58,560
+Decision trees.
+
+29
+00:00:58,560 --> 00:01:01,060
+That's also a powerful technique for classification
+
+30
+00:01:01,060 --> 00:01:02,470
+and also for regression.
+
+31
+00:01:02,470 --> 00:01:05,460
+K-Means clustering, for clustering data together.
+
+32
+00:01:05,460 --> 00:01:08,790
+Principal component analysis, singular value decomposition.
+
+33
+00:01:08,790 --> 00:01:10,790
+You know, these are dimensionality reduction techniques
+
+34
+00:01:10,790 --> 00:01:13,330
+and finally the one we're gonna play with first,
+
+35
+00:01:13,330 --> 00:01:16,230
+Recommendations using Alternating Least Squares.
+
+36
+00:01:16,230 --> 00:01:18,670
+And some of these terms may make no sense to you at all
+
+37
+00:01:18,670 --> 00:01:20,430
+if you have no background in Machine Learning,
+
+38
+00:01:20,430 --> 00:01:22,330
+but if you do, they're there for you.
+
+39
+00:01:22,330 --> 00:01:24,130
+This is not a machine learning course though.
+
+40
+00:01:24,130 --> 00:01:26,080
+So I'm not really gonna get into the weeds
+
+41
+00:01:26,080 --> 00:01:27,810
+of what these all are,
+
+42
+00:01:27,810 --> 00:01:29,750
+but if you do need to apply Machine Learning
+
+43
+00:01:29,750 --> 00:01:32,280
+to massive data sets, you just need to know
+
+44
+00:01:32,280 --> 00:01:33,950
+that Spark has ways of doing it for most
+
+45
+00:01:33,950 --> 00:01:36,170
+of the most popular algorithms out there.
+
+46
+00:01:36,170 --> 00:01:37,020
+And that's really cool
+
+47
+00:01:37,020 --> 00:01:38,720
+because a lot of these algorithms
+
+48
+00:01:38,720 --> 00:01:42,330
+really weren't developed with parallelization in mind.
+
+49
+00:01:42,330 --> 00:01:44,800
+And the fact that Spark has come up with clever ways
+
+50
+00:01:44,800 --> 00:01:46,400
+of actually distributing these algorithms
+
+51
+00:01:46,400 --> 00:01:49,593
+across an entire cluster is really, really useful.
+
+52
+00:01:51,290 --> 00:01:54,420
+So ML uses data frames as its primary API.
+
+53
+00:01:54,420 --> 00:01:56,800
+There was an earlier API called MLLib.
+
+54
+00:01:56,800 --> 00:01:59,970
+It's still in Spark, but it's being deprecated
+
+55
+00:01:59,970 --> 00:02:02,550
+as of Spark 3, so eventually they will be getting rid of it.
+
+56
+00:02:02,550 --> 00:02:04,120
+And I've already noticed that some things
+
+57
+00:02:04,120 --> 00:02:06,520
+in MLLib don't really work the same way they used to
+
+58
+00:02:06,520 --> 00:02:09,300
+in Spark 3, so you definitely wanna be moving
+
+59
+00:02:09,300 --> 00:02:11,820
+to the new ML library if you can.
+
+60
+00:02:11,820 --> 00:02:13,360
+Previously it used RDD's
+
+61
+00:02:13,360 --> 00:02:15,100
+and some specialized data structures,
+
+62
+00:02:15,100 --> 00:02:17,640
+but these days you just use data frames for everything.
+
+63
+00:02:17,640 --> 00:02:18,950
+And this is handy because it means you
+
+64
+00:02:18,950 --> 00:02:21,440
+can create a Dataframe and SparkSQL,
+
+65
+00:02:21,440 --> 00:02:23,600
+or maybe even like do stuff with it in Spark streaming
+
+66
+00:02:23,600 --> 00:02:25,380
+or structured streaming and pass that
+
+67
+00:02:25,380 --> 00:02:27,860
+into the ML library, using the same API.
+
+68
+00:02:27,860 --> 00:02:30,680
+So it allows for more interoperability
+
+69
+00:02:30,680 --> 00:02:32,780
+between the different components of Spark.
+
+70
+00:02:33,700 --> 00:02:35,960
+If you wanna more depth, there is a nice book out there
+
+71
+00:02:35,960 --> 00:02:38,710
+from O'Reilly called "Advanced Analytics with Spark"
+
+72
+00:02:38,710 --> 00:02:39,640
+I don't get anything from it.
+
+73
+00:02:39,640 --> 00:02:42,020
+I didn't write it, but it is useful in learning how
+
+74
+00:02:42,020 --> 00:02:43,610
+to apply Machine Learning on Spark
+
+75
+00:02:43,610 --> 00:02:45,030
+and giving you more of an introduction
+
+76
+00:02:45,030 --> 00:02:47,090
+into what these algorithms do.
+
+77
+00:02:47,090 --> 00:02:48,760
+Sadly that was originally written
+
+78
+00:02:48,760 --> 00:02:50,670
+with the original MLLib library,
+
+79
+00:02:50,670 --> 00:02:52,210
+and they have actually updated it
+
+80
+00:02:52,210 --> 00:02:54,460
+to use the new ML library since then.
+
+81
+00:02:54,460 --> 00:02:56,410
+So make sure you get the second edition
+
+82
+00:02:56,410 --> 00:02:57,950
+if you get that book.
+
+83
+00:02:57,950 --> 00:03:00,550
+There are examples provided with the Spark SDK itself
+
+84
+00:03:00,550 --> 00:03:02,730
+that will provide you with some general guidance
+
+85
+00:03:02,730 --> 00:03:04,560
+on how to use these algorithms.
+
+86
+00:03:04,560 --> 00:03:06,410
+Often there's a lot of little nuances
+
+87
+00:03:06,410 --> 00:03:09,580
+in how to prepare the data that you feed into these models.
+
+88
+00:03:09,580 --> 00:03:11,330
+And it's not really documented anywhere except
+
+89
+00:03:11,330 --> 00:03:13,950
+in the examples, so if you are gonna try using some
+
+90
+00:03:13,950 --> 00:03:15,770
+of these algorithms on your own,
+
+91
+00:03:15,770 --> 00:03:18,030
+make sure you refer to the examples first.
+
+92
+00:03:18,030 --> 00:03:19,660
+And for the algorithms themselves,
+
+93
+00:03:19,660 --> 00:03:22,730
+there is no shortage for Machine Learning courses out there.
+
+94
+00:03:22,730 --> 00:03:24,980
+I have my own out there too, if you wanna check it out,
+
+95
+00:03:24,980 --> 00:03:25,813
+cough, cough.
+
+96
+00:03:25,813 --> 00:03:28,713
+So lots of ways to learn about Machine Learning and Spark.
+
+97
+00:03:29,770 --> 00:03:31,780
+So using it is actually really simple
+
+98
+00:03:31,780 --> 00:03:33,290
+and that's kind of the dirty little secret
+
+99
+00:03:33,290 --> 00:03:34,940
+of Machine Learning in general.
+
+100
+00:03:34,940 --> 00:03:37,210
+A lot of these algorithms are kind of black boxes
+
+101
+00:03:37,210 --> 00:03:38,730
+and it's just a matter of feeding it data
+
+102
+00:03:38,730 --> 00:03:40,340
+in the format that it expects
+
+103
+00:03:40,340 --> 00:03:41,730
+and feeding a quality data,
+
+104
+00:03:41,730 --> 00:03:43,180
+that's actually the hard part
+
+105
+00:03:43,180 --> 00:03:45,300
+and setting the appropriate knobs
+
+106
+00:03:45,300 --> 00:03:46,820
+and dials on those algorithms.
+
+107
+00:03:46,820 --> 00:03:48,790
+So we call those hyper parameters.
+
+108
+00:03:48,790 --> 00:03:50,910
+We'll see an example of that here.
+
+109
+00:03:50,910 --> 00:03:53,530
+But actually building a model and making predictions
+
+110
+00:03:53,530 --> 00:03:55,850
+from that model is usually pretty simple.
+
+111
+00:03:55,850 --> 00:03:58,180
+And what's even better is that because
+
+112
+00:03:58,180 --> 00:04:00,280
+all of these models basically have the same job
+
+113
+00:04:00,280 --> 00:04:03,140
+of applying some sort of learning to a set of data
+
+114
+00:04:03,140 --> 00:04:05,070
+and making predictions based on that data.
+
+115
+00:04:05,070 --> 00:04:07,100
+Often they have pretty much the same API.
+
+116
+00:04:07,100 --> 00:04:08,630
+So using different models
+
+117
+00:04:08,630 --> 00:04:10,540
+is actually really straightforward.
+
+118
+00:04:10,540 --> 00:04:12,640
+They all use kind of the same approach.
+
+119
+00:04:12,640 --> 00:04:14,140
+So for example, let's say we wanna make
+
+120
+00:04:14,140 --> 00:04:16,850
+some movie recommendations, which we're about to do,
+
+121
+00:04:16,850 --> 00:04:19,800
+the core of that is just really these three lines of code.
+
+122
+00:04:19,800 --> 00:04:21,990
+So we can read in our ratings data
+
+123
+00:04:21,990 --> 00:04:23,080
+that we wanna train it with.
+
+124
+00:04:23,080 --> 00:04:25,930
+So in this case, we're loading up that ml-100k data set
+
+125
+00:04:25,930 --> 00:04:28,670
+that we've looked at several times earlier in this course.
+
+126
+00:04:28,670 --> 00:04:31,690
+That's just a data set of 100,000 user ratings
+
+127
+00:04:31,690 --> 00:04:33,320
+of different movies.
+
+128
+00:04:33,320 --> 00:04:35,490
+As long as you've loaded that up in some sort of schema
+
+129
+00:04:35,490 --> 00:04:37,570
+that makes sense, we can just pass that
+
+130
+00:04:37,570 --> 00:04:39,500
+into the ALS model as you'll see here.
+
+131
+00:04:39,500 --> 00:04:43,200
+So, we create a new ALS model by just saying ALS
+
+132
+00:04:43,200 --> 00:04:46,630
+and max iterations and regularization parameter
+
+133
+00:04:46,630 --> 00:04:48,910
+are both what we call hyper parameters.
+
+134
+00:04:48,910 --> 00:04:50,900
+So another dirty little secret of Machine Learning
+
+135
+00:04:50,900 --> 00:04:52,770
+in general, is that most of the work,
+
+136
+00:04:52,770 --> 00:04:53,920
+well, I wouldn't say most of the workout,
+
+137
+00:04:53,920 --> 00:04:57,780
+a lot of the work is in what we call hyper parameter tuning.
+
+138
+00:04:57,780 --> 00:04:59,710
+And a lot of that is just trial and error.
+
+139
+00:04:59,710 --> 00:05:01,870
+There's usually not a lot of good guidance
+
+140
+00:05:01,870 --> 00:05:03,700
+as to what to set for the actual values,
+
+141
+00:05:03,700 --> 00:05:06,900
+for things like max iterations or regularization parameters
+
+142
+00:05:06,900 --> 00:05:08,300
+to get the best results.
+
+143
+00:05:08,300 --> 00:05:09,920
+What people often do is they just run
+
+144
+00:05:09,920 --> 00:05:12,700
+this algorithm repeatedly, trying out different values
+
+145
+00:05:12,700 --> 00:05:14,700
+until they converge on the set of values
+
+146
+00:05:14,700 --> 00:05:18,300
+that provide the best results for their dataset.
+
+147
+00:05:18,300 --> 00:05:20,320
+So yeah, a lot of ML is just trial and error
+
+148
+00:05:20,320 --> 00:05:23,590
+and that's kind of a, you know, something people
+
+149
+00:05:23,590 --> 00:05:25,720
+don't really appreciate very much.
+
+150
+00:05:25,720 --> 00:05:28,330
+Beyond that we just tell it what the column names are
+
+151
+00:05:28,330 --> 00:05:30,600
+for the userIDs and for the itemIDs
+
+152
+00:05:30,600 --> 00:05:32,010
+and for the ratings.
+
+153
+00:05:32,010 --> 00:05:35,810
+So whatever your Dataframe format may be,
+
+154
+00:05:35,810 --> 00:05:37,700
+as long as you have a column for userIDs,
+
+155
+00:05:37,700 --> 00:05:39,620
+you have a column for movieIDs
+
+156
+00:05:39,620 --> 00:05:40,710
+and you have a column for ratings,
+
+157
+00:05:40,710 --> 00:05:42,940
+you can just pass those in as parameters
+
+158
+00:05:42,940 --> 00:05:46,020
+to set user calls, set item call and set rating call.
+
+159
+00:05:46,020 --> 00:05:48,010
+And at that point you have a model object
+
+160
+00:05:48,010 --> 00:05:51,170
+that you can train, and to do that you just call fit on it,
+
+161
+00:05:51,170 --> 00:05:53,950
+passing in that Dataframe of the training data.
+
+162
+00:05:53,950 --> 00:05:55,570
+And at that point you can use that model
+
+163
+00:05:55,570 --> 00:05:57,580
+to predict how much a user might like a movie
+
+164
+00:05:57,580 --> 00:05:59,290
+that they haven't even seen yet.
+
+165
+00:05:59,290 --> 00:06:00,250
+It's just that easy.
+
+166
+00:06:00,250 --> 00:06:03,313
+So let's jump to the code and see how it works.
+
+167
+00:00:00,990 --> 00:00:01,823
+So let's introduce
+
+168
+00:00:01,823 --> 00:00:03,490
+Spark's machine learning library,
+
+169
+00:00:03,490 --> 00:00:05,990
+which has the creative name of ML.
+
+170
+00:00:05,990 --> 00:00:07,240
+And to illustrate its usage,
+
+171
+00:00:07,240 --> 00:00:09,460
+we'll actually generate some movie recommendations
+
+172
+00:00:09,460 --> 00:00:13,300
+using it's a built in recommendation algorithm called ALS.
+
+173
+00:00:13,300 --> 00:00:15,240
+So a little bit about ML at a higher level.
+
+174
+00:00:15,240 --> 00:00:16,870
+It has a lot of capabilities.
+
+175
+00:00:16,870 --> 00:00:19,380
+You are limited to the algorithms
+
+176
+00:00:19,380 --> 00:00:20,500
+that provides out of the box,
+
+177
+00:00:20,500 --> 00:00:22,820
+but it's a pretty wide set of algorithms.
+
+178
+00:00:22,820 --> 00:00:24,570
+So for pretty much anything you'd wanna do,
+
+179
+00:00:24,570 --> 00:00:28,170
+short of neural networks, it's probably in there.
+
+180
+00:00:28,170 --> 00:00:30,960
+We have a Term Frequency and Inverse Document Frequency.
+
+181
+00:00:30,960 --> 00:00:32,230
+So if you're building a search engine,
+
+182
+00:00:32,230 --> 00:00:34,280
+that's a useful capability to have.
+
+183
+00:00:34,280 --> 00:00:37,880
+It has some basic statistical functions you can apply.
+
+184
+00:00:37,880 --> 00:00:40,190
+It can do regressions, both linear and logistics.
+
+185
+00:00:40,190 --> 00:00:42,410
+So whether you need to predict a number
+
+186
+00:00:42,410 --> 00:00:44,850
+or a category or a true false kind of a thing,
+
+187
+00:00:44,850 --> 00:00:46,370
+it can apply regression model
+
+188
+00:00:46,370 --> 00:00:48,430
+and sometimes simple models like that
+
+189
+00:00:48,430 --> 00:00:50,890
+are all you need for fancier stuff.
+
+190
+00:00:50,890 --> 00:00:52,760
+It has support vector machines.
+
+191
+00:00:52,760 --> 00:00:53,593
+Naive Bayes.
+
+192
+00:00:53,593 --> 00:00:54,890
+You know, you see that in a lot of
+
+193
+00:00:54,890 --> 00:00:57,420
+spam classifying examples out there.
+
+194
+00:00:57,420 --> 00:00:58,560
+Decision trees.
+
+195
+00:00:58,560 --> 00:01:01,060
+That's also a powerful technique for classification
+
+196
+00:01:01,060 --> 00:01:02,470
+and also for regression.
+
+197
+00:01:02,470 --> 00:01:05,460
+K-Means clustering, for clustering data together.
+
+198
+00:01:05,460 --> 00:01:08,790
+Principal component analysis, singular value decomposition.
+
+199
+00:01:08,790 --> 00:01:10,790
+You know, these are dimensionality reduction techniques
+
+200
+00:01:10,790 --> 00:01:13,330
+and finally the one we're gonna play with first,
+
+201
+00:01:13,330 --> 00:01:16,230
+Recommendations using Alternating Least Squares.
+
+202
+00:01:16,230 --> 00:01:18,670
+And some of these terms may make no sense to you at all
+
+203
+00:01:18,670 --> 00:01:20,430
+if you have no background in Machine Learning,
+
+204
+00:01:20,430 --> 00:01:22,330
+but if you do, they're there for you.
+
+205
+00:01:22,330 --> 00:01:24,130
+This is not a machine learning course though.
+
+206
+00:01:24,130 --> 00:01:26,080
+So I'm not really gonna get into the weeds
+
+207
+00:01:26,080 --> 00:01:27,810
+of what these all are,
+
+208
+00:01:27,810 --> 00:01:29,750
+but if you do need to apply Machine Learning
+
+209
+00:01:29,750 --> 00:01:32,280
+to massive data sets, you just need to know
+
+210
+00:01:32,280 --> 00:01:33,950
+that Spark has ways of doing it for most
+
+211
+00:01:33,950 --> 00:01:36,170
+of the most popular algorithms out there.
+
+212
+00:01:36,170 --> 00:01:37,020
+And that's really cool
+
+213
+00:01:37,020 --> 00:01:38,720
+because a lot of these algorithms
+
+214
+00:01:38,720 --> 00:01:42,330
+really weren't developed with parallelization in mind.
+
+215
+00:01:42,330 --> 00:01:44,800
+And the fact that Spark has come up with clever ways
+
+216
+00:01:44,800 --> 00:01:46,400
+of actually distributing these algorithms
+
+217
+00:01:46,400 --> 00:01:49,593
+across an entire cluster is really, really useful.
+
+218
+00:01:51,290 --> 00:01:54,420
+So ML uses data frames as its primary API.
+
+219
+00:01:54,420 --> 00:01:56,800
+There was an earlier API called MLLib.
+
+220
+00:01:56,800 --> 00:01:59,970
+It's still in Spark, but it's being deprecated
+
+221
+00:01:59,970 --> 00:02:02,550
+as of Spark 3, so eventually they will be getting rid of it.
+
+222
+00:02:02,550 --> 00:02:04,120
+And I've already noticed that some things
+
+223
+00:02:04,120 --> 00:02:06,520
+in MLLib don't really work the same way they used to
+
+224
+00:02:06,520 --> 00:02:09,300
+in Spark 3, so you definitely wanna be moving
+
+225
+00:02:09,300 --> 00:02:11,820
+to the new ML library if you can.
+
+226
+00:02:11,820 --> 00:02:13,360
+Previously it used RDD's
+
+227
+00:02:13,360 --> 00:02:15,100
+and some specialized data structures,
+
+228
+00:02:15,100 --> 00:02:17,640
+but these days you just use data frames for everything.
+
+229
+00:02:17,640 --> 00:02:18,950
+And this is handy because it means you
+
+230
+00:02:18,950 --> 00:02:21,440
+can create a Dataframe and SparkSQL,
+
+231
+00:02:21,440 --> 00:02:23,600
+or maybe even like do stuff with it in Spark streaming
+
+232
+00:02:23,600 --> 00:02:25,380
+or structured streaming and pass that
+
+233
+00:02:25,380 --> 00:02:27,860
+into the ML library, using the same API.
+
+234
+00:02:27,860 --> 00:02:30,680
+So it allows for more interoperability
+
+235
+00:02:30,680 --> 00:02:32,780
+between the different components of Spark.
+
+236
+00:02:33,700 --> 00:02:35,960
+If you wanna more depth, there is a nice book out there
+
+237
+00:02:35,960 --> 00:02:38,710
+from O'Reilly called "Advanced Analytics with Spark"
+
+238
+00:02:38,710 --> 00:02:39,640
+I don't get anything from it.
+
+239
+00:02:39,640 --> 00:02:42,020
+I didn't write it, but it is useful in learning how
+
+240
+00:02:42,020 --> 00:02:43,610
+to apply Machine Learning on Spark
+
+241
+00:02:43,610 --> 00:02:45,030
+and giving you more of an introduction
+
+242
+00:02:45,030 --> 00:02:47,090
+into what these algorithms do.
+
+243
+00:02:47,090 --> 00:02:48,760
+Sadly that was originally written
+
+244
+00:02:48,760 --> 00:02:50,670
+with the original MLLib library,
+
+245
+00:02:50,670 --> 00:02:52,210
+and they have actually updated it
+
+246
+00:02:52,210 --> 00:02:54,460
+to use the new ML library since then.
+
+247
+00:02:54,460 --> 00:02:56,410
+So make sure you get the second edition
+
+248
+00:02:56,410 --> 00:02:57,950
+if you get that book.
+
+249
+00:02:57,950 --> 00:03:00,550
+There are examples provided with the Spark SDK itself
+
+250
+00:03:00,550 --> 00:03:02,730
+that will provide you with some general guidance
+
+251
+00:03:02,730 --> 00:03:04,560
+on how to use these algorithms.
+
+252
+00:03:04,560 --> 00:03:06,410
+Often there's a lot of little nuances
+
+253
+00:03:06,410 --> 00:03:09,580
+in how to prepare the data that you feed into these models.
+
+254
+00:03:09,580 --> 00:03:11,330
+And it's not really documented anywhere except
+
+255
+00:03:11,330 --> 00:03:13,950
+in the examples, so if you are gonna try using some
+
+256
+00:03:13,950 --> 00:03:15,770
+of these algorithms on your own,
+
+257
+00:03:15,770 --> 00:03:18,030
+make sure you refer to the examples first.
+
+258
+00:03:18,030 --> 00:03:19,660
+And for the algorithms themselves,
+
+259
+00:03:19,660 --> 00:03:22,730
+there is no shortage for Machine Learning courses out there.
+
+260
+00:03:22,730 --> 00:03:24,980
+I have my own out there too, if you wanna check it out,
+
+261
+00:03:24,980 --> 00:03:25,813
+cough, cough.
+
+262
+00:03:25,813 --> 00:03:28,713
+So lots of ways to learn about Machine Learning and Spark.
+
+263
+00:03:29,770 --> 00:03:31,780
+So using it is actually really simple
+
+264
+00:03:31,780 --> 00:03:33,290
+and that's kind of the dirty little secret
+
+265
+00:03:33,290 --> 00:03:34,940
+of Machine Learning in general.
+
+266
+00:03:34,940 --> 00:03:37,210
+A lot of these algorithms are kind of black boxes
+
+267
+00:03:37,210 --> 00:03:38,730
+and it's just a matter of feeding it data
+
+268
+00:03:38,730 --> 00:03:40,340
+in the format that it expects
+
+269
+00:03:40,340 --> 00:03:41,730
+and feeding a quality data,
+
+270
+00:03:41,730 --> 00:03:43,180
+that's actually the hard part
+
+271
+00:03:43,180 --> 00:03:45,300
+and setting the appropriate knobs
+
+272
+00:03:45,300 --> 00:03:46,820
+and dials on those algorithms.
+
+273
+00:03:46,820 --> 00:03:48,790
+So we call those hyper parameters.
+
+274
+00:03:48,790 --> 00:03:50,910
+We'll see an example of that here.
+
+275
+00:03:50,910 --> 00:03:53,530
+But actually building a model and making predictions
+
+276
+00:03:53,530 --> 00:03:55,850
+from that model is usually pretty simple.
+
+277
+00:03:55,850 --> 00:03:58,180
+And what's even better is that because
+
+278
+00:03:58,180 --> 00:04:00,280
+all of these models basically have the same job
+
+279
+00:04:00,280 --> 00:04:03,140
+of applying some sort of learning to a set of data
+
+280
+00:04:03,140 --> 00:04:05,070
+and making predictions based on that data.
+
+281
+00:04:05,070 --> 00:04:07,100
+Often they have pretty much the same API.
+
+282
+00:04:07,100 --> 00:04:08,630
+So using different models
+
+283
+00:04:08,630 --> 00:04:10,540
+is actually really straightforward.
+
+284
+00:04:10,540 --> 00:04:12,640
+They all use kind of the same approach.
+
+285
+00:04:12,640 --> 00:04:14,140
+So for example, let's say we wanna make
+
+286
+00:04:14,140 --> 00:04:16,850
+some movie recommendations, which we're about to do,
+
+287
+00:04:16,850 --> 00:04:19,800
+the core of that is just really these three lines of code.
+
+288
+00:04:19,800 --> 00:04:21,990
+So we can read in our ratings data
+
+289
+00:04:21,990 --> 00:04:23,080
+that we wanna train it with.
+
+290
+00:04:23,080 --> 00:04:25,930
+So in this case, we're loading up that ml-100k data set
+
+291
+00:04:25,930 --> 00:04:28,670
+that we've looked at several times earlier in this course.
+
+292
+00:04:28,670 --> 00:04:31,690
+That's just a data set of 100,000 user ratings
+
+293
+00:04:31,690 --> 00:04:33,320
+of different movies.
+
+294
+00:04:33,320 --> 00:04:35,490
+As long as you've loaded that up in some sort of schema
+
+295
+00:04:35,490 --> 00:04:37,570
+that makes sense, we can just pass that
+
+296
+00:04:37,570 --> 00:04:39,500
+into the ALS model as you'll see here.
+
+297
+00:04:39,500 --> 00:04:43,200
+So, we create a new ALS model by just saying ALS
+
+298
+00:04:43,200 --> 00:04:46,630
+and max iterations and regularization parameter
+
+299
+00:04:46,630 --> 00:04:48,910
+are both what we call hyper parameters.
+
+300
+00:04:48,910 --> 00:04:50,900
+So another dirty little secret of Machine Learning
+
+301
+00:04:50,900 --> 00:04:52,770
+in general, is that most of the work,
+
+302
+00:04:52,770 --> 00:04:53,920
+well, I wouldn't say most of the workout,
+
+303
+00:04:53,920 --> 00:04:57,780
+a lot of the work is in what we call hyper parameter tuning.
+
+304
+00:04:57,780 --> 00:04:59,710
+And a lot of that is just trial and error.
+
+305
+00:04:59,710 --> 00:05:01,870
+There's usually not a lot of good guidance
+
+306
+00:05:01,870 --> 00:05:03,700
+as to what to set for the actual values,
+
+307
+00:05:03,700 --> 00:05:06,900
+for things like max iterations or regularization parameters
+
+308
+00:05:06,900 --> 00:05:08,300
+to get the best results.
+
+309
+00:05:08,300 --> 00:05:09,920
+What people often do is they just run
+
+310
+00:05:09,920 --> 00:05:12,700
+this algorithm repeatedly, trying out different values
+
+311
+00:05:12,700 --> 00:05:14,700
+until they converge on the set of values
+
+312
+00:05:14,700 --> 00:05:18,300
+that provide the best results for their dataset.
+
+313
+00:05:18,300 --> 00:05:20,320
+So yeah, a lot of ML is just trial and error
+
+314
+00:05:20,320 --> 00:05:23,590
+and that's kind of a, you know, something people
+
+315
+00:05:23,590 --> 00:05:25,720
+don't really appreciate very much.
+
+316
+00:05:25,720 --> 00:05:28,330
+Beyond that we just tell it what the column names are
+
+317
+00:05:28,330 --> 00:05:30,600
+for the userIDs and for the itemIDs
+
+318
+00:05:30,600 --> 00:05:32,010
+and for the ratings.
+
+319
+00:05:32,010 --> 00:05:35,810
+So whatever your Dataframe format may be,
+
+320
+00:05:35,810 --> 00:05:37,700
+as long as you have a column for userIDs,
+
+321
+00:05:37,700 --> 00:05:39,620
+you have a column for movieIDs
+
+322
+00:05:39,620 --> 00:05:40,710
+and you have a column for ratings,
+
+323
+00:05:40,710 --> 00:05:42,940
+you can just pass those in as parameters
+
+324
+00:05:42,940 --> 00:05:46,020
+to set user calls, set item call and set rating call.
+
+325
+00:05:46,020 --> 00:05:48,010
+And at that point you have a model object
+
+326
+00:05:48,010 --> 00:05:51,170
+that you can train, and to do that you just call fit on it,
+
+327
+00:05:51,170 --> 00:05:53,950
+passing in that Dataframe of the training data.
+
+328
+00:05:53,950 --> 00:05:55,570
+And at that point you can use that model
+
+329
+00:05:55,570 --> 00:05:57,580
+to predict how much a user might like a movie
+
+330
+00:05:57,580 --> 00:05:59,290
+that they haven't even seen yet.
+
+331
+00:05:59,290 --> 00:06:00,250
+It's just that easy.
+
+332
+00:06:00,250 --> 00:06:03,313
+So let's jump to the code and see how it works.

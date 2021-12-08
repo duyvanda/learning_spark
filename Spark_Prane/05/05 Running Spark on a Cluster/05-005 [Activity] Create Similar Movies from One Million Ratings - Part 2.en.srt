@@ -1,0 +1,691 @@
+1
+00:00:00,560 --> 00:00:00,910
+Ok.
+
+2
+00:00:00,920 --> 00:00:06,110
+It's time to run our similarity script on a spark cluster in the cloud on a plastic map reduce pretty
+
+3
+00:00:06,110 --> 00:00:06,710
+big deal.
+
+4
+00:00:06,710 --> 00:00:09,110
+This is kind of the culmination of the whole course here.
+
+5
+00:00:09,110 --> 00:00:11,620
+So let's kick it off and see what happens.
+
+6
+00:00:12,980 --> 00:00:18,560
+So before we actually run our script on a spark cluster using Amazon's elastic map produced service
+
+7
+00:00:18,560 --> 00:00:22,010
+let's talk about some of the basic strategies that we're gonna use here.
+
+8
+00:00:22,010 --> 00:00:27,110
+So like we talked about before we're gonna use the default empty spark cough in the driver script in
+
+9
+00:00:27,110 --> 00:00:28,070
+that way.
+
+10
+00:00:28,130 --> 00:00:32,990
+Instead we'll use the default said elastic mass produced sets up for us and that will automatically
+
+11
+00:00:32,990 --> 00:00:38,420
+tell spark that it should be running on top of EMR as Hadoop ya in a cluster manager.
+
+12
+00:00:38,420 --> 00:00:41,630
+And that way it will automatically know what the layout of the cluster is.
+
+13
+00:00:41,630 --> 00:00:43,820
+You know who is the master.
+
+14
+00:00:43,820 --> 00:00:45,830
+How many client machines do I have.
+
+15
+00:00:45,830 --> 00:00:46,490
+Who are they.
+
+16
+00:00:46,490 --> 00:00:49,700
+How many executives do they have and what not.
+
+17
+00:00:50,240 --> 00:00:54,620
+Now when I'm actually running this I'm gonna need it pass one extra argument to spark submit.
+
+18
+00:00:54,620 --> 00:00:59,540
+So in the past we've always just called Sparks submit followed by the script name and whatever parameters
+
+19
+00:00:59,540 --> 00:01:00,720
+were passing into it.
+
+20
+00:01:00,920 --> 00:01:03,340
+But there's a bunch of other options you can pass into.
+
+21
+00:01:03,560 --> 00:01:09,080
+And specifically we're gonna pass in dash dash executor dash memory 1 G.
+
+22
+00:01:09,260 --> 00:01:16,400
+And that's because I know from past experience that if I try to run this with a default memory of 512
+
+23
+00:01:16,400 --> 00:01:21,560
+megabytes per executor that's not enough for that self join operation to actually succeed.
+
+24
+00:01:21,560 --> 00:01:29,050
+So by passing an executor memory 1 g I'm saying I want one gigabyte of memory per executor and that
+
+25
+00:01:29,050 --> 00:01:34,250
+should give me plenty to work with you know throughout that partition that's been broken up into one
+
+26
+00:01:34,250 --> 00:01:38,410
+hundred partitions for that self join anything lower just won't work.
+
+27
+00:01:38,410 --> 00:01:41,520
+Really the only way to figure this out is through trial and error unfortunately.
+
+28
+00:01:41,540 --> 00:01:46,730
+So you know I tried the default setting of five controlled megabytes my executors kept failing increase
+
+29
+00:01:46,740 --> 00:01:48,340
+it to one gigabyte and everything was happy.
+
+30
+00:01:48,340 --> 00:01:50,500
+So no real science to it.
+
+31
+00:01:50,500 --> 00:01:55,180
+You know you just have to experiment what works and try to do that experimentation as quickly as possible
+
+32
+00:01:55,180 --> 00:01:57,470
+because time is money on these clusters.
+
+33
+00:01:57,930 --> 00:01:58,640
+So.
+
+34
+00:02:00,090 --> 00:02:05,790
+So yeah there are other options you can pass in as well for example dash dash master yarn will tell
+
+35
+00:02:05,800 --> 00:02:10,900
+sparks submit explicitly to run on a yarn cluster but EMR actually sets that up for us by default.
+
+36
+00:02:10,900 --> 00:02:15,200
+However if you're running on your own cluster you might need to pass that in by hand.
+
+37
+00:02:17,480 --> 00:02:23,900
+Now ahead of time I've copied everything to Ada Lewis's S3 service just so I can access all of my scripts
+
+38
+00:02:23,900 --> 00:02:30,440
+and data files that I need quickly and I can use that to quickly copy over my script from S3 and also
+
+39
+00:02:30,500 --> 00:02:38,270
+refer to my large big data if you will using S3 and your URLs so that I can just load my data directly
+
+40
+00:02:38,280 --> 00:02:40,010
+from Amazon's S3 service.
+
+41
+00:02:40,020 --> 00:02:46,100
+One good thing about using Amazon Web Services EMR cluster is that it has very fast and very good connectivity
+
+42
+00:02:46,100 --> 00:02:46,950
+to S3.
+
+43
+00:02:46,970 --> 00:02:52,940
+So as three becomes a good choice for a distributed file system to use together with EMR.
+
+44
+00:02:52,940 --> 00:02:57,300
+You can also spin up an HD DFS file system as well if you want to.
+
+45
+00:02:57,320 --> 00:03:02,310
+All right so that's our next thing we'll do will be to spin up an EMR cluster for SPARC using the AWOL
+
+46
+00:03:02,360 --> 00:03:03,050
+console.
+
+47
+00:03:03,050 --> 00:03:08,330
+The clock starts ticking on our bill at this point as soon as those clusters become available we'll
+
+48
+00:03:08,330 --> 00:03:14,540
+get the external DNS name for the master node and log into it using putty and we will then copy our
+
+49
+00:03:14,540 --> 00:03:20,720
+driver program run it let it run and watch the output and as soon as we're done we're gonna terminate
+
+50
+00:03:20,720 --> 00:03:23,680
+that cluster so that so that we stop getting billed for that time.
+
+51
+00:03:23,690 --> 00:03:25,190
+Very important.
+
+52
+00:03:25,190 --> 00:03:27,680
+That's in all upper case and bold letters for a reason.
+
+53
+00:03:27,680 --> 00:03:31,160
+So if you do in fact follow along with me don't remember.
+
+54
+00:03:31,160 --> 00:03:33,670
+Don't forget turning the cluster over done.
+
+55
+00:03:33,680 --> 00:03:37,360
+So let's go and start the process.
+
+56
+00:03:37,460 --> 00:03:42,300
+All right it's time to actually run this script on a real spark cluster in the cloud.
+
+57
+00:03:42,320 --> 00:03:43,130
+And here we go.
+
+58
+00:03:43,130 --> 00:03:49,070
+So again remember that we're gonna be racking up some real charges here it's gonna cost real money to
+
+59
+00:03:49,070 --> 00:03:54,590
+run this on Amazon Web Services so feel free to follow along as long as you're careful to remember to
+
+60
+00:03:54,590 --> 00:03:56,220
+terminate your cluster when you're done.
+
+61
+00:03:56,220 --> 00:04:00,890
+You know it should only cost you a few dollars to run this once but if you have any doubts about your
+
+62
+00:04:00,890 --> 00:04:04,490
+ability to remember to terminate this cluster tone to it.
+
+63
+00:04:04,490 --> 00:04:06,410
+Just watch me do it OK.
+
+64
+00:04:06,410 --> 00:04:08,530
+It's gonna be cheaper and a lot safer that way.
+
+65
+00:04:08,540 --> 00:04:11,020
+But follow along at your own risk okay.
+
+66
+00:04:11,030 --> 00:04:12,780
+You have been warned.
+
+67
+00:04:12,780 --> 00:04:13,060
+All right.
+
+68
+00:04:13,100 --> 00:04:14,600
+Now to make life easier.
+
+69
+00:04:14,690 --> 00:04:20,370
+I've actually gone ahead and copy the one million email one M one million reading data sets to a sun
+
+70
+00:04:20,370 --> 00:04:26,960
+dog desk spark bucket on Amazon as three service so that my smart cluster can access it and I've also
+
+71
+00:04:26,960 --> 00:04:35,060
+copy the script itself to my son dog desk spark s three bucket as well so that way I can quickly obtain
+
+72
+00:04:35,060 --> 00:04:40,960
+it obtain a copy of it from my master note on my cluster so once I spin up that cluster first things
+
+73
+00:04:40,970 --> 00:04:44,780
+I'm gonna do because the know time is money the clock starts ticking right away.
+
+74
+00:04:44,900 --> 00:04:50,560
+I'm gonna call this little script to actually copy the movie similarities one MDR JPY script from S3
+
+75
+00:04:50,630 --> 00:04:56,330
+to that master node and then I'm going to copy over the movies dot that file that is kind of used to
+
+76
+00:04:56,330 --> 00:05:01,670
+load up and create that movie I did a movie name lookup table that is gonna use in the final output.
+
+77
+00:05:01,670 --> 00:05:07,130
+And finally I left myself a little cheat sheet here of what to actually run to execute this job.
+
+78
+00:05:08,240 --> 00:05:17,490
+OK so let's do it go to your go to the AWOL start Amazon.com console and we're gonna go to the console
+
+79
+00:05:17,720 --> 00:05:21,120
+to sign in and I'm gonna click on EMR
+
+80
+00:05:24,370 --> 00:05:34,490
+and I'm going to create a new cluster I'm gonna call it 1 million similarity or 1 million ratings more
+
+81
+00:05:34,490 --> 00:05:35,100
+specifically.
+
+82
+00:05:35,120 --> 00:05:35,800
+Right.
+
+83
+00:05:35,890 --> 00:05:37,550
+1 million ratings.
+
+84
+00:05:37,830 --> 00:05:40,210
+I don't really need logging because there's no easy way.
+
+85
+00:05:40,310 --> 00:05:42,090
+Easy way for me to look at it anyway.
+
+86
+00:05:42,170 --> 00:05:47,750
+I'm just gonna go ahead launch the cluster as opposed to using steps and we are going to use the latest
+
+87
+00:05:47,780 --> 00:05:54,980
+EMR release and we want primarily SPARC so to save a little bit of time I'm not gonna bother installing
+
+88
+00:05:54,980 --> 00:05:57,710
+Hive in my house and pagan stuff that I don't need.
+
+89
+00:05:57,710 --> 00:06:05,480
+I just want to spark one point five running on top of dupes ya and cluster manager and I will stick
+
+90
+00:06:05,480 --> 00:06:10,170
+with the default M 3 x large instances 3 of them.
+
+91
+00:06:10,430 --> 00:06:12,230
+Mm hmm.
+
+92
+00:06:12,320 --> 00:06:13,210
+Let's go with five
+
+93
+00:06:15,970 --> 00:06:17,600
+more is better.
+
+94
+00:06:17,790 --> 00:06:18,070
+All right.
+
+95
+00:06:18,070 --> 00:06:23,260
+For the key pair remember in the previous lectures we actually created a key pair and we need to select
+
+96
+00:06:23,260 --> 00:06:23,830
+that now.
+
+97
+00:06:23,830 --> 00:06:25,960
+So for me I'm using these SPARC Kiki pair.
+
+98
+00:06:25,960 --> 00:06:32,620
+This will correspond to the PPA file that you're gonna use to connect to your master node using putty
+
+99
+00:06:32,620 --> 00:06:34,530
+or whatever terminal you have.
+
+100
+00:06:34,810 --> 00:06:38,890
+And I will leave everything else as the default okay.
+
+101
+00:06:40,140 --> 00:06:42,450
+Here we go create cluster at this point.
+
+102
+00:06:42,600 --> 00:06:44,550
+The bill starts adding up.
+
+103
+00:06:44,910 --> 00:06:49,590
+So again don't hit this button unless you're comfortable spending a few dollars here and you're comfortable
+
+104
+00:06:49,590 --> 00:06:50,580
+with your ability to.
+
+105
+00:06:50,590 --> 00:06:52,120
+This cluster as soon as you're done using it.
+
+106
+00:06:52,210 --> 00:06:54,620
+OK if you're not comfortable with that.
+
+107
+00:06:54,900 --> 00:06:57,210
+Just watch me.
+
+108
+00:06:57,210 --> 00:06:58,710
+Here I go.
+
+109
+00:06:58,860 --> 00:06:59,060
+All right.
+
+110
+00:06:59,070 --> 00:07:02,100
+Now it's gonna take about five minutes for these to actually get provision.
+
+111
+00:07:02,100 --> 00:07:07,100
+So what's happening under the hood here is Amazon's Web Services framework is going out.
+
+112
+00:07:07,110 --> 00:07:13,680
+It's finding five available and three dot X large instances computers out there in its data centers
+
+113
+00:07:13,680 --> 00:07:16,290
+that I can have and it's gonna reserve those for me.
+
+114
+00:07:16,290 --> 00:07:20,940
+It's gonna install the operating system on them is gonna install spark and it's gonna install Hadoop
+
+115
+00:07:21,690 --> 00:07:23,070
+and that will take a few minutes.
+
+116
+00:07:23,070 --> 00:07:29,610
+So until this actually says you know stop saying provisioning and actually says that these systems are
+
+117
+00:07:29,610 --> 00:07:34,290
+actually ready to go and started we can't actually do anything quite yet.
+
+118
+00:07:34,320 --> 00:07:39,450
+So through the magic of video editing we're gonna cut here and I'm gonna come back in about five minutes
+
+119
+00:07:39,990 --> 00:07:43,820
+when these systems should be all spun up for me so I'll be right back.
+
+120
+00:07:43,950 --> 00:07:44,240
+Okay.
+
+121
+00:07:44,250 --> 00:07:48,870
+Through the magic of video editing we're back about five minutes later and sure enough my instances
+
+122
+00:07:48,870 --> 00:07:54,900
+have spun up so I now have a running master node of 1 and 3 x large instance and four core nodes of
+
+123
+00:07:54,900 --> 00:07:57,630
+an M three X large running as well.
+
+124
+00:07:57,630 --> 00:08:02,340
+So let's go ahead and without further ado connect to that and kick off our script because the bill is
+
+125
+00:08:02,340 --> 00:08:08,090
+going here and time is money so up here we have the public DNS name of our Master node.
+
+126
+00:08:08,750 --> 00:08:12,390
+And if you click on the SSA tab here we'll actually give you instructions on exactly what you need to
+
+127
+00:08:12,390 --> 00:08:13,770
+do to connect to it.
+
+128
+00:08:14,070 --> 00:08:14,800
+And we have connect.
+
+129
+00:08:14,820 --> 00:08:18,210
+We have instructions for both windows which I've been describing and also for Mac and Linux.
+
+130
+00:08:18,210 --> 00:08:23,010
+So if you are doing this from Linux or Mac OS this will tell you a little bit more detail what you need
+
+131
+00:08:23,010 --> 00:08:23,720
+to do.
+
+132
+00:08:23,730 --> 00:08:29,250
+Again you just need that spark keyed up VM file that we got from the key pair from easy to earlier and
+
+133
+00:08:29,250 --> 00:08:31,460
+you can type in something like this to actually connect into it.
+
+134
+00:08:31,560 --> 00:08:32,640
+But we are using putty.
+
+135
+00:08:33,270 --> 00:08:41,080
+So I'm going to copy this bit here which is what I need to type into the hostname field and go ahead
+
+136
+00:08:41,080 --> 00:08:49,600
+and open putty I want to piece that into the hostname and I'm gonna go to my SSD each section go to
+
+137
+00:08:49,600 --> 00:08:58,490
+off and select my PPA file that I created earlier and that should get me right in yeah yeah no we're
+
+138
+00:08:58,490 --> 00:09:02,340
+fine and there we are in that cute ask here.
+
+139
+00:09:03,760 --> 00:09:04,260
+All right.
+
+140
+00:09:04,360 --> 00:09:06,370
+Now it's time to get busy.
+
+141
+00:09:06,520 --> 00:09:07,480
+Let's kick this thing off.
+
+142
+00:09:07,480 --> 00:09:13,760
+So if you recall I left myself a little cheat sheet here in my script comments of what I need to do
+
+143
+00:09:13,770 --> 00:09:16,140
+so let's go ahead and do all of this.
+
+144
+00:09:16,200 --> 00:09:22,730
+First thing I will do is copy the script itself down so I typed in eight of us as three CPS three colon
+
+145
+00:09:22,790 --> 00:09:28,440
+slash our son dog spark slash movie similarities.
+
+146
+00:09:28,440 --> 00:09:32,950
+One m p y dot slash.
+
+147
+00:09:33,120 --> 00:09:39,030
+And what that's gonna do is go to s three and copy my python script my driver script here to this local
+
+148
+00:09:39,030 --> 00:09:40,920
+directory here in my home directory.
+
+149
+00:09:40,920 --> 00:09:45,010
+I also need the look up file for movie ideas to movie names so let's do that next day.
+
+150
+00:09:45,070 --> 00:09:53,720
+Alias s three C.P. has three columns last last Sunday August spark slash M.L. dash one m slash movie
+
+151
+00:09:53,730 --> 00:09:59,880
+start date also to the current directory and there we have that finally I'm going to kick off the job
+
+152
+00:09:59,880 --> 00:10:00,450
+itself.
+
+153
+00:10:00,450 --> 00:10:01,150
+Here we go.
+
+154
+00:10:01,230 --> 00:10:10,050
+Spark dash submit dash dash executor dash memory 1 g to give one gigabyte of memory per executor and
+
+155
+00:10:10,050 --> 00:10:11,020
+the name of the script.
+
+156
+00:10:11,030 --> 00:10:13,200
+Movie similarities.
+
+157
+00:10:13,290 --> 00:10:14,880
+1 M P Y.
+
+158
+00:10:14,880 --> 00:10:21,390
+And finally the movie ideas for Star Wars which I am interested in getting similarities for and off
+
+159
+00:10:21,420 --> 00:10:22,380
+we go.
+
+160
+00:10:27,110 --> 00:10:30,210
+All right I'm gonna let this go a little bit just to make sure everything's happy
+
+161
+00:10:37,340 --> 00:10:41,000
+you can see us doing all sorts of stuff and we're getting lots of info messages that we had filtered
+
+162
+00:10:41,000 --> 00:10:42,970
+out on our desktop configuration.
+
+163
+00:10:42,980 --> 00:10:48,260
+But while you're running on the cluster you want a little bit more insight as to what's going on in
+
+164
+00:10:48,260 --> 00:10:53,180
+case something goes wrong.
+
+165
+00:10:53,230 --> 00:10:58,750
+All right you can see here that it's already kicking off that sort by key operation here with 16 output
+
+166
+00:10:58,750 --> 00:11:04,120
+partitions doing all sorts of good stuff here.
+
+167
+00:11:04,170 --> 00:11:07,810
+All right I'm gonna come back later and we'll revisit this because this will take a little bit of time
+
+168
+00:11:07,810 --> 00:11:13,400
+to finish and we'll take a look at the results when it's done.
+
+169
+00:11:13,400 --> 00:11:14,140
+Well there we have it.
+
+170
+00:11:14,150 --> 00:11:17,010
+We've kicked off our job and it's running on a cluster at this point.
+
+171
+00:11:17,090 --> 00:11:18,320
+Pretty awesome.
+
+172
+00:11:18,320 --> 00:11:23,600
+I'd say we're actually you know doing big data now and we're running it on a spark cluster in the cloud.
+
+173
+00:11:23,660 --> 00:11:26,270
+So we'll let that run and take a look at the results in our next lecture.

@@ -1,0 +1,363 @@
+1
+00:00:00,840 --> 00:00:04,330
+Next I want to talk about a few more troubleshooting tips with Spark.
+
+2
+00:00:04,350 --> 00:00:08,070
+There are some strange things that will happen at times, and some of them have happened to me in the
+
+3
+00:00:08,070 --> 00:00:08,830
+past.
+
+4
+00:00:08,850 --> 00:00:13,440
+It's not always obvious what to do about them either, so I'll share some of my experiences with that
+
+5
+00:00:13,770 --> 00:00:17,120
+and we'll talk about managing code dependencies within spark jobs as well.
+
+6
+00:00:17,130 --> 00:00:22,960
+So let's do that now. so let's talk about troubleshooting a little bit more, and I can tell you I did
+
+7
+00:00:22,960 --> 00:00:29,470
+need to do some troubleshooting to get that million readings job running successfully on my SPARK cluster.
+
+8
+00:00:29,470 --> 00:00:30,670
+So where are the logs?
+
+9
+00:00:30,670 --> 00:00:35,950
+I mean we saw some stuff scroll by from the driver script and in practice if you're running on EMR, that's
+
+10
+00:00:35,950 --> 00:00:37,800
+pretty much all you're gonna have to go on.
+
+11
+00:00:37,990 --> 00:00:42,970
+Now like I showed you, if you're in standalone mode and you have access directly on the network to your
+
+12
+00:00:42,970 --> 00:00:48,700
+master node, all the log information is just displayed in this beautiful graphical form and the web UI.
+
+13
+00:00:48,700 --> 00:00:53,620
+But if you're running on top of YARN, those logs end up getting distributed and you need to collect them
+
+14
+00:00:53,620 --> 00:00:54,270
+after the fact,
+
+15
+00:00:54,280 --> 00:01:00,400
+using this command. Yarn logs dash dash your application I.D., and use that to actually bring them
+
+16
+00:01:00,400 --> 00:01:02,830
+all back together so you can see them.
+
+17
+00:01:02,830 --> 00:01:04,290
+Your job is distributed.
+
+18
+00:01:04,300 --> 00:01:08,200
+And so the logs are distributed, and that makes them a little bit difficult to actually consolidate and
+
+19
+00:01:08,200 --> 00:01:09,390
+look at what's going on.
+
+20
+00:01:10,270 --> 00:01:15,130
+But you know a lot of times you kind of intuit what's happening. What happened with me when I was
+
+21
+00:01:15,130 --> 00:01:19,930
+trying to get this movie similarities with one million reading script running was that when I first
+
+22
+00:01:19,930 --> 00:01:24,460
+started running it, I kept getting errors in the driver's script that said that executors were failing
+
+23
+00:01:24,460 --> 00:01:25,330
+to issue heartbeats.
+
+24
+00:01:25,330 --> 00:01:31,300
+So I would kick off an executor to do some job, and that executor would just go away and never respond
+
+25
+00:01:31,300 --> 00:01:31,780
+again.
+
+26
+00:01:31,780 --> 00:01:35,230
+And it was you just got it hung right.
+
+27
+00:01:35,260 --> 00:01:39,610
+So when that happens it's probably a good sign that you're just asking too much of each executor.
+
+28
+00:01:39,610 --> 00:01:41,680
+So one thing is you can throw more machines at it.
+
+29
+00:01:41,710 --> 00:01:46,720
+And indeed, I found that by going up to 10 machines in my cluster, it ran a lot more reliably than with
+
+30
+00:01:46,720 --> 00:01:51,580
+you know four or five, and I might also mean that each executor may need more memory.
+
+31
+00:01:51,580 --> 00:01:57,640
+So even after doing that, they still hung unless I gave them one gigabyte per executor like we did earlier.
+
+32
+00:01:58,000 --> 00:02:00,850
+With the default value of 512 megabytes, it just wasn't enough.
+
+33
+00:02:00,850 --> 00:02:02,400
+Even with a hundred partitions.
+
+34
+00:02:02,710 --> 00:02:04,400
+And that brings me to the last point.
+
+35
+00:02:04,630 --> 00:02:08,740
+You can always increase the number of partitions in order to demand less work from each individual executor
+
+36
+00:02:08,740 --> 00:02:14,150
+job by using smaller partition sizes to split up your job into smaller bits.
+
+37
+00:02:14,230 --> 00:02:18,940
+So whenever you have executors that just get hung like that and they start issuing, they start losing
+
+38
+00:02:18,940 --> 00:02:24,660
+their heartbeat, spark's gonna start to try to destroy those executors and create new ones to try again.
+
+39
+00:02:24,670 --> 00:02:28,120
+But after about four tries, it's just going to give up in your entire job will fail.
+
+40
+00:02:28,120 --> 00:02:33,820
+So even though spark and Hadoop and yarn build themselves as being extremely fault-tolerant, at the end
+
+41
+00:02:33,820 --> 00:02:38,620
+of the day, if you're asking too much out of one of your executors and it just plain can't do it, your
+
+42
+00:02:38,620 --> 00:02:39,640
+job will still fail.
+
+43
+00:02:39,640 --> 00:02:45,940
+So don't rely on fault tolerance from Hadoop to ensure that your script will actually run successfully
+
+44
+00:02:45,970 --> 00:02:48,420
+because there is no such guarantee.
+
+45
+00:02:48,430 --> 00:02:52,870
+Now once you've configure things such that you are asking a reasonable amount of work from each executor,
+
+46
+00:02:53,320 --> 00:02:55,760
+then yeah fall tolerance does what it should be doing.
+
+47
+00:02:55,810 --> 00:02:59,740
+And if you have a genuine failure, if one of your nodes has some weird network error, then yeah it can recover
+
+48
+00:02:59,740 --> 00:03:07,030
+from that but nothing Hadoop does can recover from poorly structuring your code, having a wrong number
+
+49
+00:03:07,030 --> 00:03:10,750
+of partitions, having not enough memory or asking too much of each executor.
+
+50
+00:03:10,750 --> 00:03:15,260
+Those are problems you need to identify and fix before you put your job into production.
+
+51
+00:03:15,270 --> 00:03:16,620
+OK.
+
+52
+00:03:16,720 --> 00:03:19,640
+Another thing I want to talk about is managing dependencies.
+
+53
+00:03:19,660 --> 00:03:24,910
+So something to remember, even if something runs perfectly on your desktop, doesn't mean it will
+
+54
+00:03:24,910 --> 00:03:29,530
+run on your cluster, because you might not have the same Java environment, you might not have had the same
+
+55
+00:03:29,530 --> 00:03:34,720
+scale environment, you might not have the same Python environment; that could be an issue now.
+
+56
+00:03:35,900 --> 00:03:39,800
+Another point too is, like the same data won't be there, so if your scripts or if you're referring to
+
+57
+00:03:39,800 --> 00:03:44,540
+absolute file parts or file pass on your local desktop system, you're gonna want to make sure you fix
+
+58
+00:03:44,540 --> 00:03:46,700
+those before you run them on the Cluster.
+
+59
+00:03:46,700 --> 00:03:51,500
+One thing you can do is,  you know refer to a path that's on some distributed file system that each node has
+
+60
+00:03:51,500 --> 00:03:57,380
+access to, or you can use things like broadcast variables to actually share data outside of your RTD
+
+61
+00:03:57,380 --> 00:04:02,500
+and broadcast that to all of the nodes. But still your master node needs to get to that data somehow
+
+62
+00:04:02,510 --> 00:04:10,880
+originally before it can broadcast it to all the core nodes and you know try not to depend on obscure Python
+
+63
+00:04:10,880 --> 00:04:11,450
+packages.
+
+64
+00:04:11,450 --> 00:04:16,100
+Now if you do have a driver script that needs some weird Python package as a dependency, and it's not
+
+65
+00:04:16,100 --> 00:04:20,960
+preloaded on your Spark cluster, you can always set up a step in elastic map reduce to run Pip and
+
+66
+00:04:20,960 --> 00:04:26,000
+install whatever you need as it's in the process of spinning up each node.
+
+67
+00:04:26,060 --> 00:04:31,670
+There's also a dash dash pi dash files argument you can pass to spark submit to add individual libraries
+
+68
+00:04:31,670 --> 00:04:34,280
+and pass them off to the executor nodes.
+
+69
+00:04:34,400 --> 00:04:40,130
+But again that's only gonna work if you already have the packages you need on the master node, so you
+
+70
+00:04:40,130 --> 00:04:41,720
+kind of have this chicken and egg thing going on.
+
+71
+00:04:41,720 --> 00:04:45,410
+I mean Pip is probably the only realistic way to deal with this problem if you have to.
+
+72
+00:04:45,530 --> 00:04:50,600
+Otherwise, you still have to get what you need to the master node somehow, but honestly just try to avoid
+
+73
+00:04:50,600 --> 00:04:52,280
+using obscure packages if you can.
+
+74
+00:04:52,310 --> 00:04:57,350
+I mean time is money in your cluster, and the less time you spend fiddling with dependency issues the
+
+75
+00:04:57,350 --> 00:04:57,770
+better.
+
+76
+00:04:57,770 --> 00:05:04,050
+So if you don't need some weird package that doesn't come pre installed on your cluster, don't use it.
+
+77
+00:05:04,070 --> 00:05:05,170
+That's the best solution.
+
+78
+00:05:05,330 --> 00:05:11,360
+If you do need some weird cluster you can use, step in the EMR process to actually get that installed
+
+79
+00:05:11,360 --> 00:05:16,550
+as part of the bootstrap process for setting up your individual nodes.
+
+80
+00:05:16,550 --> 00:05:19,910
+And that is my brain dump on running spark in a cluster.
+
+81
+00:05:23,080 --> 00:05:23,800
+All right.
+
+82
+00:05:23,860 --> 00:05:27,090
+This concludes the part of the course about Sparks core.
+
+83
+00:05:27,100 --> 00:05:29,500
+You now know the things that you can do with Spark itself.
+
+84
+00:05:29,500 --> 00:05:32,030
+And we've done pretty much everything there is to do.
+
+85
+00:05:32,050 --> 00:05:36,380
+We've even run a million readings analyzed on a real cluster in the cloud using spark.
+
+86
+00:05:36,400 --> 00:05:41,370
+So congratulations, you're now pretty knowledgeable about spark if you got this far.
+
+87
+00:05:41,440 --> 00:05:45,670
+Next, we're going to talk about some of the technologies built on top of spark that are still part of
+
+88
+00:05:45,670 --> 00:05:51,040
+the greater spark package. And that will be our last section that includes sparks sequel, which is the
+
+89
+00:05:51,040 --> 00:05:55,520
+underpinning of the newer data frame API that spark is encouraging people to use going forward.
+
+90
+00:05:55,900 --> 00:06:00,360
+So don't skip this next section, as it is key to writing and understanding newer spark scripts.
+
+91
+00:06:00,370 --> 00:06:01,780
+So let's do that now!

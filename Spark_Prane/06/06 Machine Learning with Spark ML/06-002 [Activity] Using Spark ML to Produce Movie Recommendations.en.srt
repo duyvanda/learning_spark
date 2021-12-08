@@ -1,0 +1,1096 @@
+1
+00:00:01,400 --> 00:00:02,233
+<v Instructor>So let's go ahead</v>
+
+2
+00:00:02,233 --> 00:00:04,740
+and review the code here and then we'll kick it off.
+
+3
+00:00:04,740 --> 00:00:06,190
+Not a lot of code here right,
+
+4
+00:00:06,190 --> 00:00:07,500
+so even though it's applying
+
+5
+00:00:07,500 --> 00:00:09,340
+a very sophisticated model
+
+6
+00:00:09,340 --> 00:00:11,190
+called Alternating Least Squares
+
+7
+00:00:11,190 --> 00:00:13,570
+to do movie recommendations here,
+
+8
+00:00:13,570 --> 00:00:15,220
+using that algorithm is quite simple.
+
+9
+00:00:15,220 --> 00:00:16,850
+All the complexity is hidden from us,
+
+10
+00:00:16,850 --> 00:00:18,386
+thanks to Spark ML.
+
+11
+00:00:18,386 --> 00:00:19,909
+So we import the stuff we need,
+
+12
+00:00:19,909 --> 00:00:22,710
+most notably spark.ml.recommendation
+
+13
+00:00:22,710 --> 00:00:25,700
+and from there we're gonna import the ALS module.
+
+14
+00:00:25,700 --> 00:00:28,570
+And let's skip ahead to where the code actually starts
+
+15
+00:00:28,570 --> 00:00:30,230
+in the main body of the script.
+
+16
+00:00:30,230 --> 00:00:32,710
+We create our SparkSession object here as always
+
+17
+00:00:32,710 --> 00:00:34,430
+we'll call it ALSExample.
+
+18
+00:00:34,430 --> 00:00:36,480
+And now we need to construct a schema
+
+19
+00:00:36,480 --> 00:00:38,350
+for use in loading the u.data file
+
+20
+00:00:38,350 --> 00:00:40,110
+from the ml-100K datasets
+
+21
+00:00:40,110 --> 00:00:43,240
+because sadly that file does not have a hetero.
+
+22
+00:00:43,240 --> 00:00:44,230
+But that's fine,
+
+23
+00:00:44,230 --> 00:00:45,160
+we'll just do it the hard way.
+
+24
+00:00:45,160 --> 00:00:47,450
+So we create a StruckType in four StruckFields
+
+25
+00:00:47,450 --> 00:00:48,760
+that correspond to the userID
+
+26
+00:00:48,760 --> 00:00:53,200
+and movieID rating and timestamp columns in that data file.
+
+27
+00:00:53,200 --> 00:00:55,320
+And we specify the data types for them
+
+28
+00:00:55,320 --> 00:00:56,496
+and they are nullable.
+
+29
+00:00:56,496 --> 00:00:59,230
+Next we load up the movieNames file,
+
+30
+00:00:59,230 --> 00:01:01,470
+and this is actually not doing anything with Spark
+
+31
+00:01:01,470 --> 00:01:04,210
+this is just using the sys and codec libraries
+
+32
+00:01:04,210 --> 00:01:07,380
+to open up that file locally on my local file system,
+
+33
+00:01:07,380 --> 00:01:09,050
+from where I'm running the driver script.
+
+34
+00:01:09,050 --> 00:01:10,549
+And we're just gonna keep that in memory
+
+35
+00:01:10,549 --> 00:01:13,400
+as a dictionary in our Python Script.
+
+36
+00:01:13,400 --> 00:01:16,590
+And that's okay because it's a small file.
+
+37
+00:01:16,590 --> 00:01:19,150
+In the real world you might still do this
+
+38
+00:01:19,150 --> 00:01:20,300
+because this is a case
+
+39
+00:01:20,300 --> 00:01:23,500
+where there's fewer items than people, right?
+
+40
+00:01:23,500 --> 00:01:26,465
+So there's not all that many movies in the world.
+
+41
+00:01:26,465 --> 00:01:28,240
+Even if you look at every movie ever made,
+
+42
+00:01:28,240 --> 00:01:31,070
+it will probably still fit in memory on a single machine.
+
+43
+00:01:31,070 --> 00:01:33,550
+So don't distribute something if you don't have to,
+
+44
+00:01:33,550 --> 00:01:35,680
+if all you need to do is have that lookup at the end,
+
+45
+00:01:35,680 --> 00:01:36,935
+when we're storing the final data,
+
+46
+00:01:36,935 --> 00:01:39,186
+the results that we're getting back from the cluster,
+
+47
+00:01:39,186 --> 00:01:41,220
+why our waste resources on the cluster
+
+48
+00:01:41,220 --> 00:01:42,750
+distributing that around if you don't have to.
+
+49
+00:01:42,750 --> 00:01:43,805
+So that's what we're doing here.
+
+50
+00:01:43,805 --> 00:01:46,378
+We're just loading up the u.ITEM file here
+
+51
+00:01:46,378 --> 00:01:49,150
+in the specified encoding for the character
+
+52
+00:01:49,150 --> 00:01:50,850
+encoding used by that file.
+
+53
+00:01:50,850 --> 00:01:52,030
+We'll ignore errors, that's fine.
+
+54
+00:01:52,030 --> 00:01:53,986
+And we just go through every line in the file,
+
+55
+00:01:53,986 --> 00:01:55,990
+split it based on the pipe character
+
+56
+00:01:55,990 --> 00:01:58,220
+and build up that movieNames dictionary,
+
+57
+00:01:58,220 --> 00:02:00,280
+assigning movie IDs to their movie name,
+
+58
+00:02:00,280 --> 00:02:02,060
+read in from that u.ITEM file.
+
+59
+00:02:02,060 --> 00:02:05,570
+And we return that resulting dictionary as movieNames.
+
+60
+00:02:05,570 --> 00:02:10,030
+And here we return it as the, the variable names rather.
+
+61
+00:02:10,030 --> 00:02:11,560
+Next, we load up the ratings data,
+
+62
+00:02:11,560 --> 00:02:13,220
+and this is our so called Big data.
+
+63
+00:02:13,220 --> 00:02:15,010
+So we are going to load that into a dataframe,
+
+64
+00:02:15,010 --> 00:02:16,870
+so it can be distributed
+
+65
+00:02:16,870 --> 00:02:17,983
+for that we just use spark.read
+
+66
+00:02:17,983 --> 00:02:21,330
+we specify that we have a tab-delimited CSV file.
+
+67
+00:02:21,330 --> 00:02:22,910
+So it's not really a CSV file.
+
+68
+00:02:22,910 --> 00:02:23,870
+It's a TSV file,
+
+69
+00:02:23,870 --> 00:02:25,100
+but it works the same way.
+
+70
+00:02:25,100 --> 00:02:27,010
+You can still treat it as a CSV file.
+
+71
+00:02:27,010 --> 00:02:28,640
+The unique delimiter, that's fine.
+
+72
+00:02:28,640 --> 00:02:31,050
+We passed in our schema that we had defined before,
+
+73
+00:02:31,050 --> 00:02:32,910
+and that we have a handy-dandy data frame
+
+74
+00:02:32,910 --> 00:02:34,734
+containing all of our movie ratings
+
+75
+00:02:34,734 --> 00:02:36,320
+with that particular schema.
+
+76
+00:02:36,320 --> 00:02:38,400
+So we're gonna have a userID, movieID, rating
+
+77
+00:02:38,400 --> 00:02:41,670
+and timestamp column in that resulting data frame.
+
+78
+00:02:41,670 --> 00:02:43,500
+Now we get into the meat of recommendations
+
+79
+00:02:43,500 --> 00:02:44,600
+and using Spark ML.
+
+80
+00:02:44,600 --> 00:02:46,520
+So just like we saw in the slides,
+
+81
+00:02:46,520 --> 00:02:48,120
+we create a new ALS object,
+
+82
+00:02:48,120 --> 00:02:49,550
+that's Alternating Least Squares,
+
+83
+00:02:49,550 --> 00:02:52,220
+which is just a specific recommendation algorithm
+
+84
+00:02:52,220 --> 00:02:53,330
+that we're using here.
+
+85
+00:02:53,330 --> 00:02:54,939
+And it's the only one that Spark ML provides.
+
+86
+00:02:54,939 --> 00:02:58,505
+So we don't have much to choose from there I'm afraid
+
+87
+00:02:58,505 --> 00:02:59,338
+(chuckles)
+
+88
+00:02:59,338 --> 00:03:01,430
+we set the hyperparameters in this case,
+
+89
+00:03:01,430 --> 00:03:02,970
+we're setting it to 5 and 0.01.
+
+90
+00:03:02,970 --> 00:03:04,970
+I don't remember where I got those from exactly,
+
+91
+00:03:04,970 --> 00:03:07,670
+it might just be straight from the example code,
+
+92
+00:03:07,670 --> 00:03:09,210
+but I think I might've tried a few different ones
+
+93
+00:03:09,210 --> 00:03:11,570
+when I was first writing this to see what worked the best.
+
+94
+00:03:11,570 --> 00:03:13,700
+We tell it with the names of the userID,
+
+95
+00:03:13,700 --> 00:03:15,510
+itemID and rating columns are
+
+96
+00:03:15,510 --> 00:03:17,350
+that we assigned up here in our structure
+
+97
+00:03:17,350 --> 00:03:19,800
+for the movie schema and load it in.
+
+98
+00:03:19,800 --> 00:03:22,020
+So now we have an ALS model that knows
+
+99
+00:03:22,020 --> 00:03:24,240
+how to deal with that training data.
+
+100
+00:03:24,240 --> 00:03:25,270
+So we just call fit
+
+101
+00:03:25,270 --> 00:03:27,180
+and pass in that training dataframe.
+
+102
+00:03:27,180 --> 00:03:28,170
+Now in the real world,
+
+103
+00:03:28,170 --> 00:03:29,610
+you might wanna actually split
+
+104
+00:03:29,610 --> 00:03:32,010
+that into a training set and a testing set
+
+105
+00:03:32,010 --> 00:03:34,420
+like we've seen in some other examples,
+
+106
+00:03:34,420 --> 00:03:35,660
+but to keep things simple,
+
+107
+00:03:35,660 --> 00:03:37,080
+we're just gonna use the entire dataset
+
+108
+00:03:37,080 --> 00:03:39,010
+and train the model using it.
+
+109
+00:03:39,010 --> 00:03:41,090
+If you wanted to actually review the results
+
+110
+00:03:41,090 --> 00:03:43,730
+and measure whether these are good recommendations or not,
+
+111
+00:03:43,730 --> 00:03:46,050
+you could do something like reserving some of that data
+
+112
+00:03:46,050 --> 00:03:48,660
+for testing purposes and seeing if you're able
+
+113
+00:03:48,660 --> 00:03:50,360
+to successfully predict the ratings
+
+114
+00:03:50,360 --> 00:03:53,354
+that people really gave to the movies that they rated.
+
+115
+00:03:53,354 --> 00:03:54,973
+But, well I don't wanna get into
+
+116
+00:03:54,973 --> 00:03:58,440
+the nuances of evaluating recommender systems.
+
+117
+00:03:58,440 --> 00:04:00,080
+I literally have a whole course on that.
+
+118
+00:04:00,080 --> 00:04:01,093
+That's a big topic.
+
+119
+00:04:02,010 --> 00:04:03,690
+All right. So now that we have that,
+
+120
+00:04:03,690 --> 00:04:05,750
+we just need to get a prediction from it.
+
+121
+00:04:05,750 --> 00:04:07,940
+And it turns out that's one of the hardest part
+
+122
+00:04:07,940 --> 00:04:09,640
+of using this, this code here.
+
+123
+00:04:09,640 --> 00:04:11,625
+So the way it works is you construct
+
+124
+00:04:11,625 --> 00:04:13,860
+a dataframe of user IDs that you want
+
+125
+00:04:13,860 --> 00:04:15,560
+to generate recommendations for.
+
+126
+00:04:15,560 --> 00:04:18,470
+So, unfortunately there's not a simple API here
+
+127
+00:04:18,470 --> 00:04:19,303
+where you can say,
+
+128
+00:04:19,303 --> 00:04:21,280
+just give me recommendations for this user ID.
+
+129
+00:04:21,280 --> 00:04:23,490
+There used to be back in spark.mllib.
+
+130
+00:04:23,490 --> 00:04:26,470
+So and some things have gotten worse in my opinion,
+
+131
+00:04:26,470 --> 00:04:28,490
+but hey, that's the price of going
+
+132
+00:04:28,490 --> 00:04:30,140
+with dataframes for everything.
+
+133
+00:04:30,140 --> 00:04:31,580
+So the first thing we need to do is figure out
+
+134
+00:04:31,580 --> 00:04:34,320
+which user ID do we want to get recommendations for.
+
+135
+00:04:34,320 --> 00:04:35,880
+And we're actually gonna pass that in
+
+136
+00:04:35,880 --> 00:04:37,787
+as a command-line argument to this script
+
+137
+00:04:37,787 --> 00:04:39,550
+and to extract that argument,
+
+138
+00:04:39,550 --> 00:04:41,680
+we call (sys.argv [1])
+
+139
+00:04:41,680 --> 00:04:43,976
+that just gets the first parameter
+
+140
+00:04:43,976 --> 00:04:46,000
+that was passed in on the command line
+
+141
+00:04:46,000 --> 00:04:47,410
+when we invoke this script,
+
+142
+00:04:47,410 --> 00:04:49,640
+0 would be the name of the script itself.
+
+143
+00:04:49,640 --> 00:04:50,970
+We convert that to an integer
+
+144
+00:04:50,970 --> 00:04:53,960
+because we said that user IDs are integers above here.
+
+145
+00:04:53,960 --> 00:04:56,210
+So which user ID should we look at?
+
+146
+00:04:56,210 --> 00:04:58,281
+Well, if you wanna get a sort of,
+
+147
+00:04:58,281 --> 00:05:00,850
+intuitive sense of whether or not
+
+148
+00:05:00,850 --> 00:05:02,826
+we're producing good recommendations or not,
+
+149
+00:05:02,826 --> 00:05:04,820
+we need a user that we understand,
+
+150
+00:05:04,820 --> 00:05:06,580
+someone that reflects maybe our own interests.
+
+151
+00:05:06,580 --> 00:05:07,422
+And then we can say, well,
+
+152
+00:05:07,422 --> 00:05:09,601
+are these reasonable recommendations for me?
+
+153
+00:05:09,601 --> 00:05:11,020
+And that's what I've done.
+
+154
+00:05:11,020 --> 00:05:14,090
+So if we go to the course materials,
+
+155
+00:05:14,090 --> 00:05:15,913
+lemme pull that up real quick here.
+
+156
+00:05:18,910 --> 00:05:23,060
+And we go into the ml-100k folder here,
+
+157
+00:05:23,060 --> 00:05:24,973
+and let's take at look u.data.
+
+158
+00:05:26,780 --> 00:05:28,240
+You can see I've actually modified
+
+159
+00:05:28,240 --> 00:05:32,360
+the file to include a User 0 that wasn't there before.
+
+160
+00:05:32,360 --> 00:05:36,460
+So what I've done is I've made some fake ratings here
+
+161
+00:05:36,460 --> 00:05:37,480
+for user ID zero,
+
+162
+00:05:37,480 --> 00:05:39,260
+and that's gonna be my test case.
+
+163
+00:05:39,260 --> 00:05:42,700
+And as I recall, this means that I loved Star Wars
+
+164
+00:05:42,700 --> 00:05:44,450
+and the Empire Strikes Back
+
+165
+00:05:44,450 --> 00:05:46,670
+but I hated the movie Gone with the Wind.
+
+166
+00:05:46,670 --> 00:05:48,470
+That's what these movie IDs correspond to.
+
+167
+00:05:48,470 --> 00:05:51,230
+You can look those up in the u.dot item folder in here.
+
+168
+00:05:51,230 --> 00:05:53,080
+So this is basically someone
+
+169
+00:05:53,080 --> 00:05:54,690
+who likes science fiction movies,
+
+170
+00:05:54,690 --> 00:05:57,680
+but you know, isn't so much into classic romance movies.
+
+171
+00:05:57,680 --> 00:05:58,513
+Right?
+
+172
+00:05:58,513 --> 00:06:00,450
+So that kinda describes me.
+
+173
+00:06:00,450 --> 00:06:02,280
+So I can take a look at the recommendations
+
+174
+00:06:02,280 --> 00:06:04,560
+that I get for this fictitious User 0
+
+175
+00:06:04,560 --> 00:06:06,266
+and see if they make sense or not.
+
+176
+00:06:06,266 --> 00:06:08,250
+If that doesn't sound like you feel free
+
+177
+00:06:08,250 --> 00:06:10,270
+to generate your own User ID 0
+
+178
+00:06:10,270 --> 00:06:11,657
+by editing the u.data file.
+
+179
+00:06:11,657 --> 00:06:13,803
+with whatever text editor you like
+
+180
+00:06:13,803 --> 00:06:17,200
+and create your own little fake persona here,
+
+181
+00:06:17,200 --> 00:06:18,770
+you know, put in some movies that you've loved
+
+182
+00:06:18,770 --> 00:06:22,060
+some movies you've hated and see what comes out of it.
+
+183
+00:06:22,060 --> 00:06:24,730
+So having generated that fake User ID 0
+
+184
+00:06:24,730 --> 00:06:26,491
+and added that into our dataset,
+
+185
+00:06:26,491 --> 00:06:29,270
+we're gonna pass in 0 as our parameter there,
+
+186
+00:06:29,270 --> 00:06:31,430
+and that will be our user ID.
+
+187
+00:06:31,430 --> 00:06:33,690
+So we need to construct a schema for that as well,
+
+188
+00:06:33,690 --> 00:06:36,570
+because everything has to be a dataframe now.
+
+189
+00:06:36,570 --> 00:06:37,920
+So we can start to schema.
+
+190
+00:06:37,920 --> 00:06:39,340
+The user ID is an integer type,
+
+191
+00:06:39,340 --> 00:06:41,110
+and that is the one field in the structure
+
+192
+00:06:41,110 --> 00:06:42,090
+of that dataframe.
+
+193
+00:06:42,090 --> 00:06:43,610
+So we only have one column
+
+194
+00:06:43,610 --> 00:06:44,450
+in this dataframe
+
+195
+00:06:44,450 --> 00:06:46,827
+that we're fabricating for creating recommendations,
+
+196
+00:06:46,827 --> 00:06:48,903
+and that is a user ID column.
+
+197
+00:06:48,903 --> 00:06:52,160
+We then need to create a dataframe from that user ID.
+
+198
+00:06:52,160 --> 00:06:57,010
+And to do that, we need to use this weird syntax here.
+
+199
+00:06:57,010 --> 00:07:00,330
+Again, this is kind of a quirky thing with a Pyspark.
+
+200
+00:07:00,330 --> 00:07:02,150
+It needs to be a list of columns here.
+
+201
+00:07:02,150 --> 00:07:04,270
+So we can't just pass in a single column here.
+
+202
+00:07:04,270 --> 00:07:06,760
+We have to have actually say "userID,"
+
+203
+00:07:06,760 --> 00:07:09,290
+and then nothing, just to sort of trick Spark
+
+204
+00:07:09,290 --> 00:07:11,600
+into thinking that this is actually a dataframe
+
+205
+00:07:11,600 --> 00:07:12,940
+that we're constructing here.
+
+206
+00:07:12,940 --> 00:07:15,020
+So we have basically a,
+
+207
+00:07:15,020 --> 00:07:17,660
+a list of rows and within each row
+
+208
+00:07:17,660 --> 00:07:18,870
+we have a list of columns.
+
+209
+00:07:18,870 --> 00:07:19,703
+So that's why we have
+
+210
+00:07:19,703 --> 00:07:22,705
+this double square bracket thing going on here.
+
+211
+00:07:22,705 --> 00:07:25,260
+And we furthermore pass in that userSchema
+
+212
+00:07:25,260 --> 00:07:27,530
+to apply that schema to that data as
+
+213
+00:07:27,530 --> 00:07:29,380
+we're converting it to a dataframe.
+
+214
+00:07:29,380 --> 00:07:32,077
+So what we should end up with here is a user's dataframe
+
+215
+00:07:32,077 --> 00:07:34,600
+that consists of a userID column
+
+216
+00:07:34,600 --> 00:07:38,350
+with a single row consisting of the value 0.
+
+217
+00:07:38,350 --> 00:07:40,110
+And that is what we need to pass
+
+218
+00:07:40,110 --> 00:07:42,359
+into model.RecommendForUserSubset.
+
+219
+00:07:42,359 --> 00:07:45,240
+What we're saying here is I want you to generate
+
+220
+00:07:45,240 --> 00:07:48,430
+recommendations for all the users in the user's dataframe.
+
+221
+00:07:48,430 --> 00:07:49,263
+In our example,
+
+222
+00:07:49,263 --> 00:07:51,270
+there's only one user, User ID 0
+
+223
+00:07:51,270 --> 00:07:52,910
+and generate 10 recommendations,
+
+224
+00:07:52,910 --> 00:07:55,770
+the 10 best recommendations for each user.
+
+225
+00:07:55,770 --> 00:07:57,760
+We will then collect that back to the driver script.
+
+226
+00:07:57,760 --> 00:07:59,929
+So that will take all that work back from the cluster
+
+227
+00:07:59,929 --> 00:08:01,241
+and return the final results
+
+228
+00:08:01,241 --> 00:08:04,870
+to our recommendations structure here.
+
+229
+00:08:04,870 --> 00:08:05,958
+So then we just have to print them out.
+
+230
+00:08:05,958 --> 00:08:08,130
+We say, here are the top 10 recommendations
+
+231
+00:08:08,130 --> 00:08:08,963
+for the user ID,
+
+232
+00:08:08,963 --> 00:08:11,040
+whatever the user ID is that we passed in
+
+233
+00:08:11,040 --> 00:08:14,290
+which we intend to be 0 and printing that out
+
+234
+00:08:14,290 --> 00:08:16,530
+actually it turns out to be a little bit complicated too.
+
+235
+00:08:16,530 --> 00:08:19,070
+We iterate through each recommendation that comes back,
+
+236
+00:08:19,070 --> 00:08:20,440
+we extract the row.
+
+237
+00:08:20,440 --> 00:08:21,540
+So at this point,
+
+238
+00:08:21,540 --> 00:08:23,400
+userRecs is gonna be in this format.
+
+239
+00:08:23,400 --> 00:08:25,563
+It's gonna be a tuple of user ID
+
+240
+00:08:25,563 --> 00:08:28,700
+and the row object associated with that user ID,
+
+241
+00:08:28,700 --> 00:08:31,950
+actually a list of row objects associated with that user ID.
+
+242
+00:08:31,950 --> 00:08:35,430
+And that will consist of a movieID and a rating,
+
+243
+00:08:35,430 --> 00:08:37,410
+a movieID and a rating, so on and so forth.
+
+244
+00:08:37,410 --> 00:08:38,541
+So for every user ID,
+
+245
+00:08:38,541 --> 00:08:40,650
+we get back a list of a rows
+
+246
+00:08:40,650 --> 00:08:44,445
+for every unique rating prediction for that user ID.
+
+247
+00:08:44,445 --> 00:08:45,690
+So then we have to go through
+
+248
+00:08:45,690 --> 00:08:47,208
+each one of those individual recommendations
+
+249
+00:08:47,208 --> 00:08:49,060
+in our case, we're just gonna get back
+
+250
+00:08:49,060 --> 00:08:51,880
+a single userID row for a User ID 0.
+
+251
+00:08:51,880 --> 00:08:52,810
+So we need to iterate through
+
+252
+00:08:52,810 --> 00:08:54,910
+each movieID rating tuple row,
+
+253
+00:08:54,910 --> 00:08:57,080
+and extract that movieID
+
+254
+00:08:57,080 --> 00:09:00,670
+and extract that rating from that row.
+
+255
+00:09:00,670 --> 00:09:01,503
+All right.
+
+256
+00:09:01,503 --> 00:09:02,630
+So then we need to make this human readable.
+
+257
+00:09:02,630 --> 00:09:05,070
+So we use that names dictionary that we loaded up earlier
+
+258
+00:09:05,070 --> 00:09:07,300
+to convert that movieID into a movie name
+
+259
+00:09:07,300 --> 00:09:08,720
+and print out the result.
+
+260
+00:09:08,720 --> 00:09:09,760
+We just print movieName
+
+261
+00:09:09,760 --> 00:09:13,030
+and the predicted rating for that movie.
+
+262
+00:09:13,030 --> 00:09:14,330
+All right.
+
+263
+00:09:14,330 --> 00:09:16,270
+So with that, let's kick it off.
+
+264
+00:09:16,270 --> 00:09:19,830
+And again, we need to do this with a parameter.
+
+265
+00:09:19,830 --> 00:09:24,518
+So let's first go into where my course materials are,
+
+266
+00:09:24,518 --> 00:09:27,570
+(keyboard clacking)
+
+267
+00:09:27,570 --> 00:09:30,499
+And we'll kick this off with a spark-submit.
+
+268
+00:09:30,499 --> 00:09:33,499
+(keyboard clacking)
+
+269
+00:09:34,370 --> 00:09:35,340
+And the name of the script
+
+270
+00:09:35,340 --> 00:09:40,340
+is movie-recommendations-als-dataframe.py.
+
+271
+00:09:40,360 --> 00:09:44,363
+And we will pass in 0 as a parameter and kick it off.
+
+272
+00:09:46,060 --> 00:09:48,860
+And when we come back in our next video,
+
+273
+00:09:48,860 --> 00:09:50,790
+we'll take a look at the results.
+
+274
+00:09:50,790 --> 00:09:51,640
+Keep you hanging.
+

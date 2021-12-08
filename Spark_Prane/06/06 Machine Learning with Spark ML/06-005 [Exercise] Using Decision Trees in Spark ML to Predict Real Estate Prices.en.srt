@@ -1,0 +1,792 @@
+1
+00:00:00,816 --> 00:00:02,480
+<v Lecturer>So let's do another machine</v>
+
+2
+00:00:02,480 --> 00:00:03,950
+learning exercise with spark.
+
+3
+00:00:03,950 --> 00:00:04,950
+And this is a fun one,
+
+4
+00:00:04,950 --> 00:00:05,783
+because we're going
+
+5
+00:00:05,783 --> 00:00:06,900
+to be using some real data again,
+
+6
+00:00:06,900 --> 00:00:08,990
+we're going to predict real estate values,
+
+7
+00:00:08,990 --> 00:00:12,030
+using some real, real estate data from Taiwan,
+
+8
+00:00:12,030 --> 00:00:13,700
+using decision trees this time,
+
+9
+00:00:13,700 --> 00:00:15,496
+and Patrice Spark.
+
+10
+00:00:15,496 --> 00:00:16,970
+A little bit the credit to the data set
+
+11
+00:00:16,970 --> 00:00:17,930
+that we're using,
+
+12
+00:00:17,930 --> 00:00:18,763
+you'll find it
+
+13
+00:00:18,763 --> 00:00:20,410
+in the realestate.csv file,
+
+14
+00:00:20,410 --> 00:00:21,505
+in your course materials.
+
+15
+00:00:21,505 --> 00:00:24,100
+And it comes from the UCI data repository.
+
+16
+00:00:24,100 --> 00:00:25,510
+You'll find this as a good resource,
+
+17
+00:00:25,510 --> 00:00:27,610
+for finding publicly available data sets
+
+18
+00:00:27,610 --> 00:00:28,443
+for playing around with,
+
+19
+00:00:28,443 --> 00:00:29,950
+for machine learning purposes.
+
+20
+00:00:29,950 --> 00:00:32,350
+I found this just by searching for a data sets,
+
+21
+00:00:32,350 --> 00:00:34,280
+that were suitable for regression problems.
+
+22
+00:00:34,280 --> 00:00:35,660
+So that's what we're trying
+
+23
+00:00:35,660 --> 00:00:36,670
+to show you here.
+
+24
+00:00:36,670 --> 00:00:38,418
+The data itself looks like this,
+
+25
+00:00:38,418 --> 00:00:41,161
+viewed in a Excel format at least.
+
+26
+00:00:41,161 --> 00:00:43,740
+So you can see that for every row
+
+27
+00:00:43,740 --> 00:00:44,650
+of our data here,
+
+28
+00:00:44,650 --> 00:00:46,200
+we have a transaction date,
+
+29
+00:00:46,200 --> 00:00:47,222
+a house age,
+
+30
+00:00:47,222 --> 00:00:49,020
+distance to MRT.
+
+31
+00:00:49,020 --> 00:00:50,040
+That's actually distance
+
+32
+00:00:50,040 --> 00:00:53,610
+to the nearest public transportation system terminal.
+
+33
+00:00:53,610 --> 00:00:55,730
+The number of nearby convenience stores,
+
+34
+00:00:55,730 --> 00:00:57,740
+the latitude and longitude of the house
+
+35
+00:00:57,740 --> 00:00:59,867
+and the price per unit area of that,
+
+36
+00:00:59,867 --> 00:01:01,317
+that house sold for.
+
+37
+00:01:01,317 --> 00:01:03,460
+Now again, this is coming from Taiwan
+
+38
+00:01:03,460 --> 00:01:04,950
+from a new Taipei city,
+
+39
+00:01:04,950 --> 00:01:05,800
+I think it is so.
+
+40
+00:01:05,800 --> 00:01:06,860
+If you're not from there,
+
+41
+00:01:06,860 --> 00:01:08,880
+don't expect to understand the local currency,
+
+42
+00:01:08,880 --> 00:01:10,970
+or the quirks of the local
+
+43
+00:01:10,970 --> 00:01:12,400
+real estate market there.
+
+44
+00:01:12,400 --> 00:01:13,233
+The point though,
+
+45
+00:01:13,233 --> 00:01:14,510
+is that you want to predict
+
+46
+00:01:14,510 --> 00:01:15,690
+the price per unit
+
+47
+00:01:15,690 --> 00:01:17,903
+area, based on just the house age,
+
+48
+00:01:17,903 --> 00:01:20,840
+the distance to public transportation,
+
+49
+00:01:20,840 --> 00:01:23,420
+and the number of nearby convenience stores.
+
+50
+00:01:23,420 --> 00:01:25,030
+One would think there would be a lot more
+
+51
+00:01:25,030 --> 00:01:26,940
+that goes into the price of a house than that,
+
+52
+00:01:26,940 --> 00:01:28,480
+but this is what we have to work with.
+
+53
+00:01:28,480 --> 00:01:30,545
+So let's see what you can do with it.
+
+54
+00:01:30,545 --> 00:01:34,100
+Your strategy, is to use a decision tree regressor,
+
+55
+00:01:34,100 --> 00:01:36,540
+instead of a linear regression model here,
+
+56
+00:01:36,540 --> 00:01:38,050
+and they work pretty much the same way.
+
+57
+00:01:38,050 --> 00:01:39,400
+It shouldn't be too hard.
+
+58
+00:01:39,400 --> 00:01:40,233
+The reason that we're going
+
+59
+00:01:40,233 --> 00:01:41,420
+with the decision tree regressor
+
+60
+00:01:41,420 --> 00:01:43,070
+is just to save you some work,
+
+61
+00:01:43,070 --> 00:01:44,750
+because decision trees can handle data
+
+62
+00:01:44,750 --> 00:01:45,950
+in different scales better.
+
+63
+00:01:45,950 --> 00:01:48,290
+So you don't have to worry about, scaling all
+
+64
+00:01:48,290 --> 00:01:49,350
+of your input data down, all
+
+65
+00:01:49,350 --> 00:01:50,320
+of your feature data down
+
+66
+00:01:50,320 --> 00:01:51,450
+to the same range,
+
+67
+00:01:51,450 --> 00:01:52,900
+and then scaling it back up again
+
+68
+00:01:52,900 --> 00:01:53,870
+When you're done.
+
+69
+00:01:53,870 --> 00:01:55,090
+If this were a machine learning course,
+
+70
+00:01:55,090 --> 00:01:55,940
+I might make you do that,
+
+71
+00:01:55,940 --> 00:01:56,773
+but it's not.
+
+72
+00:01:56,773 --> 00:01:57,910
+So, I'm not gonna make you
+
+73
+00:01:57,910 --> 00:01:59,104
+waste your time,
+
+74
+00:01:59,104 --> 00:01:59,937
+just use the decision tree,
+
+75
+00:01:59,937 --> 00:02:00,770
+and be done with it.
+
+76
+00:02:00,770 --> 00:02:02,620
+And honestly, a little bit of an aside here,
+
+77
+00:02:02,620 --> 00:02:03,910
+decision trees are kind
+
+78
+00:02:03,910 --> 00:02:04,743
+of the new hotness.
+
+79
+00:02:04,743 --> 00:02:06,097
+There's something called XG boost,
+
+80
+00:02:06,097 --> 00:02:08,405
+which is gradient boosted decision trees,
+
+81
+00:02:08,405 --> 00:02:11,320
+which is sort of a variation on decision trees,
+
+82
+00:02:11,320 --> 00:02:13,160
+that uses multiple decision trees
+
+83
+00:02:13,160 --> 00:02:14,520
+to build upon each other.
+
+84
+00:02:14,520 --> 00:02:15,353
+And that is actually one
+
+85
+00:02:15,353 --> 00:02:16,480
+of the most powerful machine
+
+86
+00:02:16,480 --> 00:02:18,010
+learning algorithms out there right now.
+
+87
+00:02:18,010 --> 00:02:22,050
+So decision trees are a powerful tool regardless.
+
+88
+00:02:22,050 --> 00:02:23,270
+So, start with a copy
+
+89
+00:02:23,270 --> 00:02:25,390
+of the spark-linear-regression script there,
+
+90
+00:02:25,390 --> 00:02:27,030
+that's going to be a good thing to start from,
+
+91
+00:02:27,030 --> 00:02:28,720
+but it's gotta be a little bit easier,
+
+92
+00:02:28,720 --> 00:02:30,490
+because we have a header row this time.
+
+93
+00:02:30,490 --> 00:02:31,670
+So you don't need a hard code,
+
+94
+00:02:31,670 --> 00:02:33,400
+a scheme of reading the data file.
+
+95
+00:02:33,400 --> 00:02:34,610
+You don't have to do all that nonsense
+
+96
+00:02:34,610 --> 00:02:35,900
+of converting it to an RDD
+
+97
+00:02:35,900 --> 00:02:37,723
+and applying a map function to it.
+
+98
+00:02:38,930 --> 00:02:40,700
+Granted we could have handled
+
+99
+00:02:40,700 --> 00:02:43,340
+that previous example by having an explicit schema
+
+100
+00:02:43,340 --> 00:02:44,900
+and reading it in as a CSV,
+
+101
+00:02:44,900 --> 00:02:46,500
+but I just want to show you a different way
+
+102
+00:02:46,500 --> 00:02:47,720
+to do it in that last example,
+
+103
+00:02:47,720 --> 00:02:49,450
+by mixing and matching RTDs
+
+104
+00:02:49,450 --> 00:02:50,570
+and data frames.
+
+105
+00:02:50,570 --> 00:02:51,403
+But for this one,
+
+106
+00:02:51,403 --> 00:02:52,236
+there's no need to use
+
+107
+00:02:52,236 --> 00:02:53,140
+to RTDs at all.
+
+108
+00:02:53,140 --> 00:02:54,130
+We have a hetero,
+
+109
+00:02:54,130 --> 00:02:55,730
+so you can import that,
+
+110
+00:02:55,730 --> 00:02:57,720
+CSV file directly, as a data frame
+
+111
+00:02:57,720 --> 00:03:00,033
+without much trouble. So, just do that.
+
+112
+00:03:00,930 --> 00:03:02,240
+Few useful snippets of code
+
+113
+00:03:02,240 --> 00:03:03,330
+as you get started.
+
+114
+00:03:03,330 --> 00:03:04,340
+First of all,
+
+115
+00:03:04,340 --> 00:03:06,090
+you can have multiple input columns
+
+116
+00:03:06,090 --> 00:03:08,020
+and what we call a VectorAssembler.
+
+117
+00:03:08,020 --> 00:03:10,126
+So as you, after you import that raw data frame
+
+118
+00:03:10,126 --> 00:03:11,520
+from the source data,
+
+119
+00:03:11,520 --> 00:03:13,550
+and alternate way of building that
+
+120
+00:03:13,550 --> 00:03:16,420
+into the format that the decision tree regressor expects,
+
+121
+00:03:16,420 --> 00:03:19,110
+is by using something called a VectorAssembler.
+
+122
+00:03:19,110 --> 00:03:21,590
+So, before we had this RDD that we used to
+
+123
+00:03:21,590 --> 00:03:23,440
+with a map function to transform that,
+
+124
+00:03:23,440 --> 00:03:24,360
+into the format that
+
+125
+00:03:24,360 --> 00:03:26,460
+our linear regression model expected,
+
+126
+00:03:26,460 --> 00:03:29,760
+but an easier way, is actually to use a VectorAssembler.
+
+127
+00:03:29,760 --> 00:03:31,710
+So you'll probably want to take note of
+
+128
+00:03:31,710 --> 00:03:32,820
+this little syntax here,
+
+129
+00:03:32,820 --> 00:03:34,380
+or at least remember in the back of your head,
+
+130
+00:03:34,380 --> 00:03:36,440
+to look up a VectorAssembler,
+
+131
+00:03:36,440 --> 00:03:39,030
+because it's going to help you complete this task.
+
+132
+00:03:39,030 --> 00:03:40,400
+The format is something like this.
+
+133
+00:03:40,400 --> 00:03:43,040
+You just save VectorAssembler.setinputCols,
+
+134
+00:03:43,040 --> 00:03:44,790
+and you just give it a list of the
+
+135
+00:03:44,790 --> 00:03:47,050
+input columns that you want to assemble
+
+136
+00:03:47,050 --> 00:03:48,410
+as your features.
+
+137
+00:03:48,410 --> 00:03:50,600
+And then you just say assembler.transform,
+
+138
+00:03:50,600 --> 00:03:52,160
+passing in your original data frame,
+
+139
+00:03:52,160 --> 00:03:54,030
+load it up from that CSV file.
+
+140
+00:03:54,030 --> 00:03:56,845
+And furthermore, you can select the label column name,
+
+141
+00:03:56,845 --> 00:03:58,070
+and then the features.
+
+142
+00:03:58,070 --> 00:03:59,628
+The features will be sort of that,
+
+143
+00:03:59,628 --> 00:04:01,990
+that vector of feature datam.
+
+144
+00:04:01,990 --> 00:04:03,170
+So in the end,
+
+145
+00:04:03,170 --> 00:04:04,240
+you're going to have two columns,
+
+146
+00:04:04,240 --> 00:04:05,073
+that you've passed
+
+147
+00:04:05,073 --> 00:04:06,860
+into the decision tree regressor,
+
+148
+00:04:06,860 --> 00:04:08,210
+the first column will be your label,
+
+149
+00:04:08,210 --> 00:04:10,270
+which you can name whatever you want.
+
+150
+00:04:10,270 --> 00:04:13,270
+And the second will be a vector of features.
+
+151
+00:04:13,270 --> 00:04:14,340
+Just kind like the last one,
+
+152
+00:04:14,340 --> 00:04:16,110
+but we're doing it in a bit more straightforward
+
+153
+00:04:16,110 --> 00:04:18,670
+of a manner this time, by using a VectorAssembler,
+
+154
+00:04:18,670 --> 00:04:21,740
+instead of using a map function on an RDD.
+
+155
+00:04:21,740 --> 00:04:24,130
+And again, remember because we do have a header row,
+
+156
+00:04:24,130 --> 00:04:25,860
+you can load that data more easily directly
+
+157
+00:04:25,860 --> 00:04:27,220
+into a data frame,
+
+158
+00:04:27,220 --> 00:04:29,310
+just by using a data option header true,
+
+159
+00:04:29,310 --> 00:04:31,130
+and option in first schema true.
+
+160
+00:04:31,130 --> 00:04:34,332
+When you read that, in from the spark session interface,
+
+161
+00:04:34,332 --> 00:04:37,790
+as opposed to the spark context interface.
+
+162
+00:04:37,790 --> 00:04:38,627
+And again, we're going to use
+
+163
+00:04:38,627 --> 00:04:40,480
+the decision tree regressor, instead
+
+164
+00:04:40,480 --> 00:04:42,070
+of the linear regression model,
+
+165
+00:04:42,070 --> 00:04:43,250
+works the same way though.
+
+166
+00:04:43,250 --> 00:04:44,083
+One nice thing is that,
+
+167
+00:04:44,083 --> 00:04:45,610
+you can just omit the hyperparameters
+
+168
+00:04:45,610 --> 00:04:46,910
+on the decision tree regressor.
+
+169
+00:04:46,910 --> 00:04:48,740
+So, the same hyperparameters
+
+170
+00:04:48,740 --> 00:04:51,100
+that we specified for the linear regression model,
+
+171
+00:04:51,100 --> 00:04:52,110
+aren't going to be the same
+
+172
+00:04:52,110 --> 00:04:53,470
+as we use under the decision
+
+173
+00:04:53,470 --> 00:04:54,760
+to treat your aggressor.
+
+174
+00:04:54,760 --> 00:04:56,160
+It has its own hyperparameters,
+
+175
+00:04:56,160 --> 00:04:57,750
+but don't worry about that for now.
+
+176
+00:04:57,750 --> 00:04:59,110
+Just leave them unspecified,
+
+177
+00:04:59,110 --> 00:05:00,640
+and it will still work.
+
+178
+00:05:00,640 --> 00:05:01,473
+You will, however,
+
+179
+00:05:01,473 --> 00:05:03,540
+have to call .setlabelCol,
+
+180
+00:05:03,540 --> 00:05:05,480
+on their model, that will allow you
+
+181
+00:05:05,480 --> 00:05:07,437
+to specify the name of the label column,
+
+182
+00:05:07,437 --> 00:05:10,090
+assuming that it's name is not just label,
+
+183
+00:05:10,090 --> 00:05:11,510
+which is the default.
+
+184
+00:05:11,510 --> 00:05:12,660
+So with that good luck,
+
+185
+00:05:12,660 --> 00:05:14,820
+and see if you can get through that.
+
+186
+00:05:14,820 --> 00:05:16,640
+I did leave a little bit more work for you
+
+187
+00:05:16,640 --> 00:05:17,473
+to do on this one,
+
+188
+00:05:17,473 --> 00:05:18,820
+so it's not going to be a simple matter
+
+189
+00:05:18,820 --> 00:05:20,920
+of just modifying that previous example.
+
+190
+00:05:20,920 --> 00:05:22,580
+There's a little bit more involved,
+
+191
+00:05:22,580 --> 00:05:24,010
+a work to be done here,
+
+192
+00:05:24,010 --> 00:05:25,270
+but that's the point we want
+
+193
+00:05:25,270 --> 00:05:27,110
+to work you up to, developing these things
+
+194
+00:05:27,110 --> 00:05:28,740
+on your own at the end of the day.
+
+195
+00:05:28,740 --> 00:05:29,573
+So have at it,
+
+196
+00:05:29,573 --> 00:05:30,406
+and in the next lecture,
+
+197
+00:05:30,406 --> 00:05:31,520
+we'll take a look at my solution
+
+198
+00:05:31,520 --> 00:05:32,353
+to the problem.
+

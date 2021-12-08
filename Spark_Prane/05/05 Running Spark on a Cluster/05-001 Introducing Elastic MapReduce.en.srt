@@ -1,0 +1,591 @@
+1
+00:00:00,670 --> 00:00:05,170
+It's time to graduate off your desktop computer and start running some spark jobs in the cloud on an
+
+2
+00:00:05,170 --> 00:00:07,330
+actual spark cluster.
+
+3
+00:00:07,330 --> 00:00:11,590
+The easiest way I know of to actually get up and running if you don't already have a spark cluster is
+
+4
+00:00:11,590 --> 00:00:17,470
+by using Amazon's elastic map reduce service even though it says map reduce in the name you can actually
+
+5
+00:00:17,470 --> 00:00:21,880
+configure it to set up a spark cluster for you and run that on top of Hadoop and it sets everything
+
+6
+00:00:21,880 --> 00:00:23,680
+up for you automatically.
+
+7
+00:00:23,680 --> 00:00:28,510
+So let's walk through what elastic map produces how it interacts with Spark and how to decide if it's
+
+8
+00:00:28,510 --> 00:00:31,530
+something you really want to be messing with.
+
+9
+00:00:31,700 --> 00:00:36,390
+Okay let's talk about running spark on an actual cluster of computers in the cloud and getting off your
+
+10
+00:00:36,390 --> 00:00:36,940
+desktop.
+
+11
+00:00:38,470 --> 00:00:44,070
+So an easy way to get started if you don't really already have a cluster to run on is by using Amazon's
+
+12
+00:00:44,070 --> 00:00:50,610
+elastic map reduce service and it's an easy way to rent just the time you need on a cluster to actually
+
+13
+00:00:50,610 --> 00:00:53,280
+run your spark job and it makes things pretty easy.
+
+14
+00:00:53,280 --> 00:00:58,290
+So even though it says map reduce in the name it actually installs spark for you by default as well
+
+15
+00:00:58,530 --> 00:01:03,540
+and you don't have to just run mass produce jobs you can actually run spark and use the underlying Hadoop
+
+16
+00:01:03,540 --> 00:01:07,160
+environment to actually run as he or your cluster manager.
+
+17
+00:01:07,170 --> 00:01:14,010
+So yeah it has something called Hadoop yarn and if you took my earlier class on map reduce and Hadoop
+
+18
+00:01:14,020 --> 00:01:15,320
+you've heard about that already.
+
+19
+00:01:15,330 --> 00:01:21,300
+But basically yarn is dupes cluster manager and spark is able to run on top of it and that is all.
+
+20
+00:01:21,300 --> 00:01:23,880
+Also installed as part of elastic averages for you.
+
+21
+00:01:24,630 --> 00:01:26,640
+So let's back up a little bit.
+
+22
+00:01:26,640 --> 00:01:28,790
+I mean this is a service offered by Amazon.com.
+
+23
+00:01:28,800 --> 00:01:31,920
+Basically what you're doing is renting time in there.
+
+24
+00:01:32,010 --> 00:01:37,260
+There are you know massive data centers of computers and you're saying I want to like rent you know
+
+25
+00:01:37,350 --> 00:01:43,590
+six or seven different instances of computers I want to run my cluster across and instead of actually
+
+26
+00:01:43,590 --> 00:01:50,780
+buying those computers you're just paying by the hour now spark also has its own built in standalone
+
+27
+00:01:50,780 --> 00:01:55,960
+cluster manager and you can actually use that to run on easy to and has scripts to support that as well.
+
+28
+00:01:55,970 --> 00:02:00,860
+But I find that if you're gonna be using easy to anyway you may as well just use the Amazon Web Services
+
+29
+00:02:00,860 --> 00:02:06,140
+console application on the Web to launch a smart cluster that's already set up for you.
+
+30
+00:02:06,580 --> 00:02:12,780
+And then all you have to do is assess each into the master node in your cluster and copy your script
+
+31
+00:02:12,780 --> 00:02:16,890
+over and run it from there directly and I think that's a lot more straightforward than trying to figure
+
+32
+00:02:16,890 --> 00:02:20,010
+out how to use the easy to use scripts especially from Python it gets a little bit tricky.
+
+33
+00:02:21,360 --> 00:02:28,140
+Now I do want to warn you that if you did go through my earlier class on map reduce and Hadoop we also
+
+34
+00:02:28,140 --> 00:02:32,250
+used a classic map produced in that course and it was dirt cheap and the reasoning was dirt cheap is
+
+35
+00:02:32,250 --> 00:02:36,780
+because we were using dirt cheap instanced types which is basically the kind of computer that we're
+
+36
+00:02:36,780 --> 00:02:39,630
+using in our cluster but was spark by default.
+
+37
+00:02:39,630 --> 00:02:43,530
+We're using something that's a little bit more expensive actually a lot more expensive and those are
+
+38
+00:02:43,530 --> 00:02:45,240
+M3 dot ex large instances.
+
+39
+00:02:45,240 --> 00:02:48,240
+So even though we'll see that spark runs a lot faster.
+
+40
+00:02:48,240 --> 00:02:54,900
+Bear in mind we're using much more powerful computers than we did in the previous course and myself
+
+41
+00:02:54,930 --> 00:03:00,000
+personally I racked up about 30 dollars in Amazon Web Services charged developing this course so I had
+
+42
+00:03:00,000 --> 00:03:05,460
+to run the jobs are gonna go through to do movie recommendations on the cluster you know four or five
+
+43
+00:03:05,460 --> 00:03:11,850
+times and then ended up running about 30 dollars and that was me being very careful about only spinning
+
+44
+00:03:11,850 --> 00:03:14,960
+up these clusters when I needed them and terminating them as soon as I was done with them.
+
+45
+00:03:14,970 --> 00:03:17,340
+So they add up quickly.
+
+46
+00:03:17,340 --> 00:03:21,900
+So please if you are gonna follow along remember shut down your clusters when you're done or else you're
+
+47
+00:03:21,900 --> 00:03:27,060
+gonna rack up a very big bill very quickly and you're not going to be very happy about that.
+
+48
+00:03:27,180 --> 00:03:33,210
+Now if that makes you nervous you know if you don't think you have the discipline to actually remember
+
+49
+00:03:33,210 --> 00:03:36,330
+to come back and shut down that cluster and terminate it when you're done running it.
+
+50
+00:03:37,050 --> 00:03:41,430
+Maybe you shouldn't actually follow along with this and just watch me do it because there is a very
+
+51
+00:03:41,430 --> 00:03:47,520
+real risk here that you could run up a very large bill very quickly accidentally if you're not careful.
+
+52
+00:03:47,550 --> 00:03:48,160
+OK.
+
+53
+00:03:48,450 --> 00:03:53,070
+Now if you do have a corporate account with Amazon Web Services and you're doing this on somebody else's
+
+54
+00:03:53,070 --> 00:03:54,620
+dime maybe that's a different story.
+
+55
+00:03:54,630 --> 00:04:00,030
+Or if you already have a cluster for spark that you already have access to through your employer that's
+
+56
+00:04:00,030 --> 00:04:02,390
+running all the time by all means use it.
+
+57
+00:04:02,460 --> 00:04:04,080
+I'm just gonna walk through this as an alternative.
+
+58
+00:04:04,080 --> 00:04:07,680
+So you have a way of experimenting with Spark on a cluster from home.
+
+59
+00:04:07,680 --> 00:04:08,930
+If you want to play along.
+
+60
+00:04:09,060 --> 00:04:14,580
+But again please make sure after your jobs are done you need to manually terminate them in the in the
+
+61
+00:04:14,580 --> 00:04:16,660
+console and I'll show you how to do that later.
+
+62
+00:04:17,500 --> 00:04:22,440
+And the other important point to make sure that you keep your costs under control is to always run things
+
+63
+00:04:22,440 --> 00:04:24,920
+locally on your desktop on a subset of your data.
+
+64
+00:04:24,930 --> 00:04:30,750
+First remember we have operations on RTD like top and sample that you can use to create a smaller sample
+
+65
+00:04:30,750 --> 00:04:36,540
+of a data set and by doing that you can create a subset that you can use to work the initial kinks out
+
+66
+00:04:36,540 --> 00:04:40,650
+of your system at least and then when you're actually running on the Cluster hopefully the only bugs
+
+67
+00:04:40,650 --> 00:04:45,270
+you're dealing with are things that are specific to running on a cluster and that will save you a lot
+
+68
+00:04:45,270 --> 00:04:47,040
+of time and money.
+
+69
+00:04:47,040 --> 00:04:51,570
+So with that all said let's take a look at Amazon Web Services and how to set up an elastic map reduce
+
+70
+00:04:51,570 --> 00:04:55,390
+account and then we'll move on from there.
+
+71
+00:04:55,410 --> 00:04:58,050
+Well that's the elastic map produced in a nutshell.
+
+72
+00:04:58,050 --> 00:05:02,160
+If it seems like something you want to get down and dirty with and create a natively U.S. account I'll
+
+73
+00:05:02,160 --> 00:05:05,280
+walk you through some of the basics on how to get started with that next.
+
+74
+00:05:05,520 --> 00:05:08,790
+I'll also go over how to connect to it using a terminal for a Windows system.
+
+75
+00:00:00,670 --> 00:00:05,170
+It's time to graduate off your desktop computer and start running some spark jobs in the cloud on an
+
+76
+00:00:05,170 --> 00:00:07,330
+actual spark cluster.
+
+77
+00:00:07,330 --> 00:00:11,590
+The easiest way I know of to actually get it up and running if you don't already have a spark cluster is
+
+78
+00:00:11,590 --> 00:00:17,470
+by using Amazon's elastic map reduce service. Even though it says map reduce in the name, you can actually
+
+79
+00:00:17,470 --> 00:00:21,880
+configure it to set up a spark cluster for you and run that on top of Hadoop. And it sets everything
+
+80
+00:00:21,880 --> 00:00:23,680
+up for you automatically.
+
+81
+00:00:23,680 --> 00:00:28,510
+So let's walk through what elastic map produces, how it interacts with Spark, and how to decide if it's
+
+82
+00:00:28,510 --> 00:00:31,530
+something you really want to be messing with.
+
+83
+00:00:31,700 --> 00:00:36,390
+Okay let's talk about running spark on an actual cluster of computers in the cloud and getting off your
+
+84
+00:00:36,390 --> 00:00:36,940
+desktop.
+
+85
+00:00:38,470 --> 00:00:44,070
+So an easy way to get started if you don't really already have a cluster to run on is by using Amazon's
+
+86
+00:00:44,070 --> 00:00:50,610
+elastic map reduce service. And it's an easy way to rent just the time you need on a cluster to actually
+
+87
+00:00:50,610 --> 00:00:53,280
+run your spark job and it makes things pretty easy.
+
+88
+00:00:53,280 --> 00:00:58,290
+So even though it says map reduce in the name, it actually installs spark for you by default as well.
+
+89
+00:00:58,530 --> 00:01:03,540
+And you don't have to just run map reduce jobs, you can actually run spark and use the underlying Hadoop
+
+90
+00:01:03,540 --> 00:01:07,160
+environment to actually run as your cluster manager.
+
+91
+00:01:07,170 --> 00:01:14,010
+So yeah. It has something called Hadoop YARN, and if you took my earlier class on map reduce and Hadoop,
+
+92
+00:01:14,020 --> 00:01:15,320
+you've heard about that already.
+
+93
+00:01:15,330 --> 00:01:21,300
+But basically, YARN is Hadoop's cluster manager and spark is able to run on top of it, and that is all
+
+94
+00:01:21,300 --> 00:01:23,880
+also installed as part of elastic mapreduce for you.
+
+95
+00:01:24,630 --> 00:01:26,640
+So let's back up a little bit.
+
+96
+00:01:26,640 --> 00:01:28,790
+I mean this is a service offered by Amazon.com.
+
+97
+00:01:28,800 --> 00:01:31,920
+Basically what you're doing is renting time in there.
+
+98
+00:01:32,010 --> 00:01:37,260
+They are, you know, massive data centers of computers, and you're saying I want to like, rent, you know
+
+99
+00:01:37,350 --> 00:01:43,590
+six or seven different instances of computers I want to run my cluster across, and instead of actually
+
+100
+00:01:43,590 --> 00:01:50,780
+buying those computers, you're just paying by the hour. Now spark also has its own built in standalone
+
+101
+00:01:50,780 --> 00:01:55,960
+cluster manager, and you can actually use that to run on EC2 and has scripts to support that as well.
+
+102
+00:01:55,970 --> 00:02:00,860
+But I find that if you're gonna be using EC2 anyway, you may as well just use the Amazon Web Services
+
+103
+00:02:00,860 --> 00:02:06,140
+console application on the web, to launch a smart cluster that's already set up for you.
+
+104
+00:02:06,580 --> 00:02:12,780
+And then all you have to do is SSH into the master node in your cluster and copy your script
+
+105
+00:02:12,780 --> 00:02:16,890
+over, and run it from there directly. And I think that's a lot more straightforward than trying to figure
+
+106
+00:02:16,890 --> 00:02:20,010
+out how to use the easy to use scripts. Especially from Python it gets a little bit tricky.
+
+107
+00:02:21,360 --> 00:02:28,140
+Now I do want to warn you that if you did go through my earlier class on map reduce and Hadoop, we also
+
+108
+00:02:28,140 --> 00:02:32,250
+used a classic map produced in that course, and it was dirt cheap. And the reasoning it was dirt cheap is
+
+109
+00:02:32,250 --> 00:02:36,780
+because we were using dirt cheap instance types.which is basically the kind of computer that we're
+
+110
+00:02:36,780 --> 00:02:39,630
+using in our cluster. But with spark, by default,
+
+111
+00:02:39,630 --> 00:02:43,530
+we're using something that's a little bit more expensive, actually a lot more expensive, and those are
+
+112
+00:02:43,530 --> 00:02:45,240
+M3 dot x large instances.
+
+113
+00:02:45,240 --> 00:02:48,240
+So even though we'll see that spark runs a lot faster,
+
+114
+00:02:48,240 --> 00:02:54,900
+bear in mind we're using much more powerful computers than we did in the previous course. And myself
+
+115
+00:02:54,930 --> 00:03:00,000
+personally, I racked up about 30 dollars in Amazon Web Services charges developing this course. So I had
+
+116
+00:03:00,000 --> 00:03:05,460
+to run the jobs we're gonna go through to do movie recommendations on the cluster, you know, four or five
+
+117
+00:03:05,460 --> 00:03:11,850
+times. And then ended up running about 30 dollars. And that was me being very careful about only spinning
+
+118
+00:03:11,850 --> 00:03:14,960
+up these clusters when I needed them and terminating them as soon as I was done with them.
+
+119
+00:03:14,970 --> 00:03:17,340
+So they add up quickly.
+
+120
+00:03:17,340 --> 00:03:21,900
+So please, if you are gonna follow along, remember shut down your clusters when you're done, or else you're
+
+121
+00:03:21,900 --> 00:03:27,060
+gonna rack up a very big bill very quickly. And you're not going to be very happy about that.
+
+122
+00:03:27,180 --> 00:03:33,210
+Now if that makes you nervous, you know, if you don't think you have the discipline to actually remember
+
+123
+00:03:33,210 --> 00:03:36,330
+to come back and shut down that cluster and terminate it when you're done running it,
+
+124
+00:03:37,050 --> 00:03:41,430
+maybe you shouldn't actually follow along with this, and just watch me do it. Because there is a very
+
+125
+00:03:41,430 --> 00:03:47,520
+real risk here that you could run up a very large bill very quickly accidentally if you're not careful.
+
+126
+00:03:47,550 --> 00:03:48,160
+OK.
+
+127
+00:03:48,450 --> 00:03:53,070
+Now if you do have a corporate account with Amazon Web Services and you're doing this on somebody else's
+
+128
+00:03:53,070 --> 00:03:54,620
+dime, maybe that's a different story.
+
+129
+00:03:54,630 --> 00:04:00,030
+Or if you already have a cluster for spark that you already have access to through your employer that's
+
+130
+00:04:00,030 --> 00:04:02,390
+running all the time, by all means use it.
+
+131
+00:04:02,460 --> 00:04:04,080
+I'm just gonna walk through this as an alternative,
+
+132
+00:04:04,080 --> 00:04:07,680
+so you have a way of experimenting with Spark on a cluster from home
+
+133
+00:04:07,680 --> 00:04:08,930
+if you want to play along.
+
+134
+00:04:09,060 --> 00:04:14,580
+But again please make sure after your jobs are done, you need to manually terminate them in the
+
+135
+00:04:14,580 --> 00:04:16,660
+console and I'll show you how to do that later.
+
+136
+00:04:17,500 --> 00:04:22,440
+And the other important point to make sure that you keep your costs under control is, to always run things
+
+137
+00:04:22,440 --> 00:04:24,920
+locally on your desktop on a subset of your data.
+
+138
+00:04:24,930 --> 00:04:30,750
+First remember we have operations on RDDs like top and sample that you can use to create a smaller sample
+
+139
+00:04:30,750 --> 00:04:36,540
+of a data set, and by doing that, you can create a subset that you can use to work the initial kinks out
+
+140
+00:04:36,540 --> 00:04:40,650
+of your system at least. And then when you're actually running on the cluster, hopefully the only bugs
+
+141
+00:04:40,650 --> 00:04:45,270
+you're dealing with are things that are specific to running on a cluster. And that will save you a lot
+
+142
+00:04:45,270 --> 00:04:47,040
+of time and money.
+
+143
+00:04:47,040 --> 00:04:51,570
+So with that all said, let's take a look at Amazon Web Services, and how to set up an elastic map reduce
+
+144
+00:04:51,570 --> 00:04:55,390
+account. And then we'll move on from there.
+
+145
+00:04:55,410 --> 00:04:58,050
+Well that's elastic map reduce in a nutshell.
+
+146
+00:04:58,050 --> 00:05:02,160
+If it seems like something you want to get down and dirty with and to create an AWS account, I'll
+
+147
+00:05:02,160 --> 00:05:05,280
+walk you through some of the basics on how to get started with that next.
+
+148
+00:05:05,520 --> 00:05:08,790
+I'll also go over how to connect to it using a terminal for a Windows system.

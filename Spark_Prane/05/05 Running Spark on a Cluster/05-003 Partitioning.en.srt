@@ -1,0 +1,511 @@
+1
+00:00:00,880 --> 00:00:05,520
+Now that we're running on a cluster, we need to modify our script a little bit, our driver script.
+
+2
+00:00:05,530 --> 00:00:09,880
+We'll be looking at the movie similarity sample again and we're going to figure out how we can scale
+
+3
+00:00:09,880 --> 00:00:13,540
+that up to using a million movie ratings to do this.
+
+4
+00:00:13,540 --> 00:00:15,810
+We can't just run it as is and hope for the best.
+
+5
+00:00:15,820 --> 00:00:18,430
+If we were to do that it wouldn't succeed at all.
+
+6
+00:00:18,430 --> 00:00:22,090
+Instead we have to think about things like how is the state going to be partitioned.
+
+7
+00:00:22,270 --> 00:00:24,970
+And it's not hard but it is something you need to address in your script.
+
+8
+00:00:24,970 --> 00:00:30,690
+So let's cover partitioning next and how to use it in your SPARC scripts.
+
+9
+00:00:30,720 --> 00:00:35,610
+All right so let's talk about actually running our movie similarities scripts on a cluster and this
+
+10
+00:00:35,610 --> 00:00:40,340
+time we're gonna talk about throwing a million ratings at it instead of 100000 ratings.
+
+11
+00:00:40,530 --> 00:00:46,880
+Now if we were to throw this modify our movie similarities script to use the one million rating data
+
+12
+00:00:46,880 --> 00:00:51,000
+set from group lens dawg it's not gonna run your desktop obviously.
+
+13
+00:00:51,060 --> 00:00:56,370
+The main reason why is because when we do that self join to generate every possible combination of movie
+
+14
+00:00:56,370 --> 00:01:01,080
+pairs that blows up like you wouldn't believe and you're just gonna run out of memory and your job will
+
+15
+00:01:01,080 --> 00:01:03,360
+fail pretty quickly if you just run it on your desktop.
+
+16
+00:01:03,810 --> 00:01:08,880
+But even if you were to run it on and a cluster on a plastic map reduce with no matter how many computers
+
+17
+00:01:08,880 --> 00:01:11,330
+you throw at it it's still knock on Iran.
+
+18
+00:01:11,340 --> 00:01:13,740
+What will happen if you just run it as is.
+
+19
+00:01:13,950 --> 00:01:19,880
+Is that your executors will start failing and they'll just hang and you won't really know why and it's
+
+20
+00:01:19,890 --> 00:01:26,160
+it's not very easy to track down what's going on and you know there's a lot of things about sparked
+
+21
+00:01:26,160 --> 00:01:32,070
+that I love but one thing that's not so hot is that it does not automatically optimally spread out the
+
+22
+00:01:32,070 --> 00:01:34,190
+work of your job throughout a cluster.
+
+23
+00:01:34,200 --> 00:01:38,860
+You kind of have to think about that yourself and deal with it manually to some extent and that's where
+
+24
+00:01:38,860 --> 00:01:40,410
+a partitioning comes in.
+
+25
+00:01:40,440 --> 00:01:48,500
+So partition by is a method on an already D that you can use to say Hey I'm gonna run some large operation
+
+26
+00:01:48,810 --> 00:01:54,060
+and I know I have enough compute resources to actually split this up into many different executors many
+
+27
+00:01:54,060 --> 00:01:55,270
+different runs.
+
+28
+00:01:55,440 --> 00:02:01,110
+And that tells you basically how many pieces I want to break this job up into.
+
+29
+00:02:02,010 --> 00:02:07,710
+So if we actually call a partition buy on the RTD that we do a self join on First we can then split
+
+30
+00:02:07,710 --> 00:02:12,360
+it up into smaller chunks that are given executor can actually deal with and then our job will actually
+
+31
+00:02:12,360 --> 00:02:14,610
+complete successfully.
+
+32
+00:02:14,610 --> 00:02:21,120
+And once you do that any that partitioning will spark will attempt to preserve that partition and going
+
+33
+00:02:21,120 --> 00:02:23,290
+forward as much as it can.
+
+34
+00:02:23,310 --> 00:02:28,320
+So I want you to take a look at this list of different RTD methods join co group group with join left
+
+35
+00:02:28,320 --> 00:02:33,570
+outer join right our join group by key reduced by key combined by key and look up.
+
+36
+00:02:33,840 --> 00:02:35,110
+So these are very common.
+
+37
+00:02:35,340 --> 00:02:41,220
+We've definitely used group by key and reduced by key a lot and we've used join in this map produced
+
+38
+00:02:41,250 --> 00:02:42,420
+in this movie.
+
+39
+00:02:42,420 --> 00:02:44,840
+Similarities example already.
+
+40
+00:02:44,910 --> 00:02:51,210
+Anytime you're going to call one of these operations on a very large RTD they will benefit by using
+
+41
+00:02:51,210 --> 00:02:52,970
+partition buy on it beforehand.
+
+42
+00:02:52,980 --> 00:02:59,930
+So keep that in mind as part of your code review before running a large job on a cluster.
+
+43
+00:03:00,210 --> 00:03:05,100
+Look for places where you're calling any of these methods and ask yourself Do I need to call a partition
+
+44
+00:03:05,100 --> 00:03:06,390
+buy on it first.
+
+45
+00:03:06,390 --> 00:03:08,090
+Odds are you do.
+
+46
+00:03:08,870 --> 00:03:14,640
+OK so how do I choose the argument for partition by how many partitions is the right partition size.
+
+47
+00:03:14,640 --> 00:03:15,350
+So.
+
+48
+00:03:15,550 --> 00:03:19,140
+Well if you have too few partition then we'll take full advantage of your cluster it can't spread it
+
+49
+00:03:19,140 --> 00:03:23,910
+out effectively but if you have too many you know you end up shuffling data around and breaking things
+
+50
+00:03:23,910 --> 00:03:28,200
+up into two small chunks and there's some overhead associated with running an individual executive job.
+
+51
+00:03:28,200 --> 00:03:34,520
+So you don't want too many executives either but you want at least as many partitions as you have cause
+
+52
+00:03:34,520 --> 00:03:40,800
+in your cluster or as many will fit in your available memory so you know a hundred is usually a reasonable
+
+53
+00:03:40,800 --> 00:03:41,840
+place to start.
+
+54
+00:03:41,880 --> 00:03:47,670
+Let's say you have you know five or ten computers in your cluster that will split it up into a reasonable
+
+55
+00:03:47,670 --> 00:03:49,610
+amount of operations.
+
+56
+00:03:49,620 --> 00:03:56,070
+And I found that one hundred actually worked well on my own example here across a cluster of ten computers.
+
+57
+00:03:56,070 --> 00:04:03,150
+So let's go back and make some modifications to our movie similarity scripts to both make it work on
+
+58
+00:04:03,150 --> 00:04:08,040
+the one million reading datasets and also to make it work on a cluster by making sure we think about
+
+59
+00:04:08,040 --> 00:04:09,840
+partitions.
+
+60
+00:04:09,840 --> 00:04:10,190
+OK.
+
+61
+00:04:10,200 --> 00:04:12,180
+At this point we know about partitioning.
+
+62
+00:04:12,270 --> 00:04:16,830
+We now have the tools we need to go back to our movie similarity script and modify it so it will run
+
+63
+00:04:16,830 --> 00:04:19,390
+efficiently on a cluster with a much larger set of ratings.
+
+64
+00:04:19,400 --> 00:04:21,370
+So let's do that next.
+
+65
+00:00:00,880 --> 00:00:05,520
+Now that we're running on a cluster we need to modify our script a little bit our driver script.
+
+66
+00:00:05,530 --> 00:00:09,880
+We'll be looking at the movie similarity sample again and we're going to figure out how we can scale
+
+67
+00:00:09,880 --> 00:00:13,540
+that up to using a million movie ratings. To do this,
+
+68
+00:00:13,540 --> 00:00:15,810
+we can't just run it as is and hope for the best.
+
+69
+00:00:15,820 --> 00:00:18,430
+If we were to do that, it wouldn't succeed at all.
+
+70
+00:00:18,430 --> 00:00:22,090
+Instead, we have to think about things like, how is the state going to be partitioned?
+
+71
+00:00:22,270 --> 00:00:24,970
+And it's not hard, but it is something you need to address in your script.
+
+72
+00:00:24,970 --> 00:00:30,690
+So let's cover partitioning next and how to use it in your Spark scripts.
+
+73
+00:00:30,720 --> 00:00:35,610
+All right, so let's talk about actually running our movie similarities scripts on a cluster. And this
+
+74
+00:00:35,610 --> 00:00:40,340
+time, we're gonna talk about throwing a million ratings at it instead of 100000 ratings.
+
+75
+00:00:40,530 --> 00:00:46,880
+Now if we were to throw, you know just modify our movie similarities script to use the one million rating data
+
+76
+00:00:46,880 --> 00:00:51,000
+set from grouplens.org, it's not gonna run your desktop obviously.
+
+77
+00:00:51,060 --> 00:00:56,370
+The main reason why is, because, when we do that self join to generate every possible combination of movie
+
+78
+00:00:56,370 --> 00:01:01,080
+pairs, that blows up like you wouldn't believe, and you're just gonna run out of memory and your job will
+
+79
+00:01:01,080 --> 00:01:03,360
+fail pretty quickly if you just run it on your desktop.
+
+80
+00:01:03,810 --> 00:01:08,880
+But even if you were to run it on in a cluster on a plastic map reduce with, no matter how many computers,
+
+81
+00:01:08,880 --> 00:01:11,330
+you throw at it, it's still not gonna run.
+
+82
+00:01:11,340 --> 00:01:13,740
+What will happen if you just run it as is,
+
+83
+00:01:13,950 --> 00:01:19,880
+is that your executors will start failing, and they'll just hang, and you won't really know why, and it's
+
+84
+00:01:19,890 --> 00:01:26,160
+not very easy to track down what's going on. And you know, there's a lot of things about spark
+
+85
+00:01:26,160 --> 00:01:32,070
+that I love, but one thing that's not so hot is that it does not automatically optimally spread out the
+
+86
+00:01:32,070 --> 00:01:34,190
+work of your job throughout a cluster.
+
+87
+00:01:34,200 --> 00:01:38,860
+You kind of have to think about that yourself and deal with it manually to some extent, and that's where
+
+88
+00:01:38,860 --> 00:01:40,410
+a partitioning comes in.
+
+89
+00:01:40,440 --> 00:01:48,500
+So partition by is a method on an RDD that you can use to say 'Hey I'm gonna run some large operation
+
+90
+00:01:48,810 --> 00:01:54,060
+and I know I have enough compute resources to actually split this up into many different executors, many
+
+91
+00:01:54,060 --> 00:01:55,270
+different runs'.
+
+92
+00:01:55,440 --> 00:02:01,110
+And that tells you basically how many pieces I want to break this job up into.
+
+93
+00:02:02,010 --> 00:02:07,710
+So if we actually call a partition by on the RDD that we do a self join on, first, we can then split
+
+94
+00:02:07,710 --> 00:02:12,360
+it up into smaller chunks, that a given executor can actually deal with. And then our job will actually
+
+95
+00:02:12,360 --> 00:02:14,610
+complete successfully.
+
+96
+00:02:14,610 --> 00:02:21,120
+And once you do that, that partitioning, spark will attempt to preserve that partition and going
+
+97
+00:02:21,120 --> 00:02:23,290
+forward as much as it can.
+
+98
+00:02:23,310 --> 00:02:28,320
+So I want you to take a look at this list of different RDD methods, join, co group, group with join, left
+
+99
+00:02:28,320 --> 00:02:33,570
+outer join, right outer join, group by key, reduced by key, combined by key and look up.
+
+100
+00:02:33,840 --> 00:02:35,110
+So these are very common.
+
+101
+00:02:35,340 --> 00:02:41,220
+We've definitely used group by key and reduced by key a lot. And we've used join in this,
+
+102
+00:02:41,250 --> 00:02:42,420
+in this movie
+
+103
+00:02:42,420 --> 00:02:44,840
+similarities example already.
+
+104
+00:02:44,910 --> 00:02:51,210
+Anytime you're going to call one of these operations on a very large RDD, they will benefit by using
+
+105
+00:02:51,210 --> 00:02:52,970
+partition by on it beforehand.
+
+106
+00:02:52,980 --> 00:02:59,930
+So keep that in mind as part of your code review before running a large job on a cluster.
+
+107
+00:03:00,210 --> 00:03:05,100
+Look for places where you're calling any of these methods and ask yourself, 'Do I need to call a partition
+
+108
+00:03:05,100 --> 00:03:06,390
+by on it first?'.
+
+109
+00:03:06,390 --> 00:03:08,090
+Odds are, you do.
+
+110
+00:03:08,870 --> 00:03:14,640
+OK, so how do I choose the argument for partition by ,how many partitions is the right partition size?
+
+111
+00:03:14,640 --> 00:03:15,350
+So.
+
+112
+00:03:15,550 --> 00:03:19,140
+Well, if you have too few partitions then it won't take full advantage of your cluster; it can't spread it
+
+113
+00:03:19,140 --> 00:03:23,910
+out effectively. But if you have too many, you know, you end up shuffling data around and breaking things
+
+114
+00:03:23,910 --> 00:03:28,200
+up into too small chunks. And there's some overhead associated with running an individual executor job.
+
+115
+00:03:28,200 --> 00:03:34,520
+So you don't want too many executors either, but you want at least as many partitions as you have cores
+
+116
+00:03:34,520 --> 00:03:40,800
+in your cluster,  or as many will fit in your available memory. So you know, a hundred is usually a reasonable
+
+117
+00:03:40,800 --> 00:03:41,840
+place to start.
+
+118
+00:03:41,880 --> 00:03:47,670
+Let's say you have you know, five or ten computers in your cluster that will split it up into a reasonable
+
+119
+00:03:47,670 --> 00:03:49,610
+amount of operations.
+
+120
+00:03:49,620 --> 00:03:56,070
+And I found that one hundred actually worked well on my own example here across a cluster of ten computers.
+
+121
+00:03:56,070 --> 00:04:03,150
+So let's go back and make some modifications to our movie similarity scripts, to both make it work on
+
+122
+00:04:03,150 --> 00:04:08,040
+the one million reading datasets, and also to make it work on a cluster by making sure we think about
+
+123
+00:04:08,040 --> 00:04:09,840
+partitions.
+
+124
+00:04:09,840 --> 00:04:10,190
+OK.
+
+125
+00:04:10,200 --> 00:04:12,180
+At this point we know about partitioning.
+
+126
+00:04:12,270 --> 00:04:16,830
+We now have the tools we need to go back to our movie similarity script and modify it so it will run
+
+127
+00:04:16,830 --> 00:04:19,390
+efficiently on a cluster with a much larger set of ratings.
+
+128
+00:04:19,400 --> 00:04:21,370
+So let's do that next.

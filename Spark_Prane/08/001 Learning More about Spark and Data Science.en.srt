@@ -1,0 +1,267 @@
+1
+00:00:01,170 --> 00:00:01,770
+Good for you,
+
+2
+00:00:01,770 --> 00:00:02,580
+you made it this far!
+
+3
+00:00:02,580 --> 00:00:06,410
+Congratulations! And thanks for sticking through the whole course with me.
+
+4
+00:00:06,510 --> 00:00:10,800
+If you feel like it was a useful experience and you learned a few things, please leave a review that
+
+5
+00:00:10,800 --> 00:00:14,370
+will help me improve things with the course going forward and it will let me know what I'm doing right
+
+6
+00:00:14,430 --> 00:00:16,170
+and what I'm doing wrong.
+
+7
+00:00:16,170 --> 00:00:20,980
+Your review could help other prospective students understand if they should give this course a try.
+
+8
+00:00:21,010 --> 00:00:24,610
+I really appreciate that feedback and it would be great if you could take a minute after this and leave
+
+9
+00:00:24,610 --> 00:00:25,160
+a review.
+
+10
+00:00:25,850 --> 00:00:27,220
+Okay, so where do you go from here?
+
+11
+00:00:27,220 --> 00:00:28,450
+What's next?
+
+12
+00:00:28,450 --> 00:00:30,610
+Well, there is obviously a lot more to learn.
+
+13
+00:00:30,610 --> 00:00:34,600
+We covered a lot of the basics of Spark but, you know, there's more to the field of data science than
+
+14
+00:00:34,600 --> 00:00:36,460
+big data as a whole.
+
+15
+00:00:36,460 --> 00:00:40,600
+If you want to sort of desktop reference to refer to instead of videos there are some books that I can
+
+16
+00:00:40,600 --> 00:00:42,170
+recommend about spark.
+
+17
+00:00:42,220 --> 00:00:44,800
+I won't make any money from these or anything so don't worry about that,
+
+18
+00:00:44,800 --> 00:00:49,120
+I'm not trying to sell you anything but these books I have personally enjoyed and I recommend giving
+
+19
+00:00:49,120 --> 00:00:52,530
+them a look at. The O'Reilly series I think is very useful.
+
+20
+00:00:52,540 --> 00:00:56,830
+They have a book called Learning spark that I found to be a helpful reference while learning. It has
+
+21
+00:00:56,830 --> 00:01:00,670
+a lot of good little snippets and code examples in there that you might find useful
+
+22
+00:01:00,940 --> 00:01:05,470
+and if you're going to be using spark for some real machine learning and data mining work, I also really
+
+23
+00:01:05,470 --> 00:01:07,550
+like advanced analytics with Spark,
+
+24
+00:01:07,570 --> 00:01:11,570
+also from the O'Reilly press, it takes more of a data mining view of things.
+
+25
+00:01:11,590 --> 00:01:14,990
+So, you know, it goes more to death with things like M.L. lib.
+
+26
+00:01:15,310 --> 00:01:18,760
+What I really like about this book is that it doesn't assume that you're a machine learning or data
+
+27
+00:01:18,760 --> 00:01:19,990
+mining expert,
+
+28
+00:01:19,990 --> 00:01:24,520
+it takes the time to actually review things like what is K Means clustering and things like what is
+
+29
+00:01:24,520 --> 00:01:26,710
+Pearson correlation metric all about?
+
+30
+00:01:26,950 --> 00:01:30,760
+It doesn't automatically assume that you're already an expert in this stuff and it's written in a very
+
+31
+00:01:30,760 --> 00:01:36,390
+conversational tone and I like it for that reason - because you know data mining doesn't have to be hard,
+
+32
+00:01:36,430 --> 00:01:38,760
+machine learning doesn't have to be hard.
+
+33
+00:01:38,830 --> 00:01:42,160
+The concepts themselves are actually pretty straightforward once you grasp them,
+
+34
+00:01:42,220 --> 00:01:45,970
+you just have to get through the terminology and all the fancy language.
+
+35
+00:01:46,120 --> 00:01:50,610
+On the other hand, there's a book called Data algorithms by O'Reilly, a very thick book,
+
+36
+00:01:50,650 --> 00:01:54,850
+though it's not really spark specific. It's actually written for Hadoop and map reduce with Spark
+
+37
+00:01:54,850 --> 00:01:57,220
+is kind of a third option. In the book
+
+38
+00:01:57,220 --> 00:02:01,030
+they have a bunch of recipes for different types of problems you might encounter in the machine learning
+
+39
+00:02:01,030 --> 00:02:06,950
+world and some sample solutions to those problems, using both map reduce and spark side by side.
+
+40
+00:02:06,970 --> 00:02:10,840
+It does spend a lot of time on the map reduce side of things so I'm not really sure this one is written
+
+41
+00:02:10,840 --> 00:02:15,970
+with Spark in mind specifically the tone is also a little bit more academic, so you might find it a little
+
+42
+00:02:15,970 --> 00:02:21,010
+bit less accessible if you're new to the field, but there are some very useful recipes in there.
+
+43
+00:02:21,640 --> 00:02:26,050
+So my recommendation would be to go check out the table of contents on your favorite booksellers website
+
+44
+00:02:26,320 --> 00:02:28,390
+and just keep that list handy.
+
+45
+00:02:28,390 --> 00:02:32,320
+I mean, beyond the world of spark itself, there's obviously a lot more to the world of data mining and
+
+46
+00:02:32,320 --> 00:02:37,240
+data science in general. Just knowing spark does not make you a data scientists that will make lots and
+
+47
+00:02:37,240 --> 00:02:41,630
+lots of money, learning about data mining in general is a good idea as well.
+
+48
+00:02:41,710 --> 00:02:45,940
+As I mentioned, the advanced analytics with Spark book touches on that a little bit but picking up a
+
+49
+00:02:45,940 --> 00:02:51,230
+course like statistics for dummies is probably a good place to start if you're totally new to that field.
+
+50
+00:02:51,290 --> 00:02:54,530
+Be sure to also look for courses on machine learning and data mining,
+
+51
+00:02:54,560 --> 00:02:58,770
+those are probably the keywords you want to look for in data science in a more general term.
+
+52
+00:02:58,790 --> 00:03:00,320
+There's a lot more to learn there as well.
+
+53
+00:03:01,320 --> 00:03:05,170
+Alright, well I hope that gives you a good starting point for your next step toward a career as a data
+
+54
+00:03:05,170 --> 00:03:09,850
+scientist or if you're already a data scientist or an engineer working at a large software company that
+
+55
+00:03:09,850 --> 00:03:12,400
+has lots of big data to process,
+
+56
+00:03:12,430 --> 00:03:14,830
+I hope you now have a new tool under your belt.
+
+57
+00:03:14,890 --> 00:03:19,510
+Spark is a very fast, easy and efficient way to manage large amounts of data on a cluster.
+
+58
+00:03:19,510 --> 00:03:24,170
+If you have access to one, or even if you don't, EMR is a good way to get one for pretty cheap.
+
+59
+00:03:24,280 --> 00:03:25,990
+Hey, it's been a good ride.
+
+60
+00:03:26,020 --> 00:03:27,450
+Thanks for coming along with me.
+
+61
+00:03:27,490 --> 00:03:28,930
+I appreciate it.
+
+62
+00:03:28,930 --> 00:03:31,290
+There is one more bonus lecture at the end of this course
+
+63
+00:03:31,300 --> 00:03:35,830
+so feel free to give that a watch, that also gives me a chance to tell you about some other stuff that
+
+64
+00:03:35,830 --> 00:03:37,070
+I can offer you. Again,
+
+65
+00:03:37,090 --> 00:03:37,600
+thank you
+
+66
+00:03:37,950 --> 00:03:42,400
+and if you haven't already, please don't forget to take a minute and leave your review on the course.
+
+67
+00:03:42,400 --> 00:03:42,880
+Thanks a lot.

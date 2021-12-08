@@ -1,0 +1,591 @@
+1
+00:00:00,360 --> 00:00:04,710
+Let's have a quick look at our movie similarities script we modified to run on the one million ratings
+
+2
+00:00:04,710 --> 00:00:09,530
+data set for movie lines will cover how we're going to address partitioning and this new script as well.
+
+3
+00:00:09,540 --> 00:00:11,980
+So let's take a look at that code.
+
+4
+00:00:12,250 --> 00:00:17,550
+OK so let's modify our movie similarity script to actually work on the 1 million rating datasets and
+
+5
+00:00:17,550 --> 00:00:20,180
+make it so it can run in the cloud.
+
+6
+00:00:20,180 --> 00:00:23,950
+On Amazon's elastic map reduce or any spar cluster for that matter.
+
+7
+00:00:24,000 --> 00:00:30,630
+So if you haven't already go grab the movie similarities 1 m one million python script from the resources
+
+8
+00:00:30,630 --> 00:00:33,360
+for this lecture and save it wherever you want to.
+
+9
+00:00:33,360 --> 00:00:36,780
+It's actually not that important where you say this one because we're not actually gonna run it on your
+
+10
+00:00:36,780 --> 00:00:43,670
+desktop anyway you just need to look at it and know where it is so open it up just so we can take a
+
+11
+00:00:43,670 --> 00:00:48,090
+peek and I'll walk you through the stuff that we've actually changed here.
+
+12
+00:00:48,090 --> 00:00:53,010
+Now first of all we've made some changes so that it uses the 1 million ratings data set from group lines
+
+13
+00:00:53,040 --> 00:00:55,170
+instead of the 100000 ratings data set.
+
+14
+00:00:55,170 --> 00:01:00,930
+So if you want to grab that go over to group lines dot org and click on data sets and you'll find it
+
+15
+00:01:00,960 --> 00:01:07,320
+in the movie lines 1 m data set to 1 million ratings and this is a little bit more current from 2003.
+
+16
+00:01:07,320 --> 00:01:10,070
+But you know still pretty high to date.
+
+17
+00:01:10,190 --> 00:01:14,790
+You know they do have a current dataset that is updated as of this month.
+
+18
+00:01:14,790 --> 00:01:21,490
+But you're going to need a pretty large cluster D to handle the 40 million plus ratings in that dataset.
+
+19
+00:01:21,510 --> 00:01:22,860
+Let's stick with one million for now.
+
+20
+00:01:22,860 --> 00:01:25,470
+Just to keep costs under control if nothing else.
+
+21
+00:01:25,800 --> 00:01:27,390
+Go ahead and download that if you want to.
+
+22
+00:01:27,520 --> 00:01:31,080
+And when you get it you'll see that it's structured a little bit differently and we need to account
+
+23
+00:01:31,080 --> 00:01:32,010
+for that in our script.
+
+24
+00:01:32,010 --> 00:01:39,460
+So first thing we do the name the movie I.D. the movie name lookup table is now in a file called movie
+
+25
+00:01:39,460 --> 00:01:40,450
+start date.
+
+26
+00:01:40,470 --> 00:01:46,290
+And what I'm gonna do is make sure that that file exists in the same directory as my script as my driver
+
+27
+00:01:46,290 --> 00:01:49,290
+script when I'm running this on the master note of my cluster.
+
+28
+00:01:49,290 --> 00:01:54,080
+So the function that just loads up that dictionary of movie I did a movie name is because it's gonna
+
+29
+00:01:54,120 --> 00:01:59,190
+look locally in our current directory for movie star debt and we know that that's actually delimited
+
+30
+00:01:59,190 --> 00:02:03,910
+by these double colon thing now which is kind of a new format but otherwise it's doing the same thing
+
+31
+00:02:03,910 --> 00:02:05,720
+as before.
+
+32
+00:02:05,900 --> 00:02:08,280
+You don't think the things that have changed.
+
+33
+00:02:08,290 --> 00:02:12,510
+Notice that we're loading the actual ratings data from S three.
+
+34
+00:02:12,520 --> 00:02:18,910
+This is Amazon simple stories service and that is actually a distributed and redundant data store.
+
+35
+00:02:18,940 --> 00:02:23,140
+So if you are going to be dealing with really big data often it's data that's going to be living in
+
+36
+00:02:23,140 --> 00:02:26,170
+the cloud itself on some distributed file system.
+
+37
+00:02:26,170 --> 00:02:31,680
+And if you have a h DFS data store you could also have an HD DFS your URL here if you wanted to.
+
+38
+00:02:31,720 --> 00:02:37,360
+This basically tells spark go out to Amazon's as three service with this as three n euro look in the
+
+39
+00:02:37,360 --> 00:02:43,270
+sun dog dash spark bucket that I've created and under there it knows where to find the large ratings
+
+40
+00:02:43,270 --> 00:02:47,790
+dot that file that I got from the group lends one million ratings data set.
+
+41
+00:02:48,220 --> 00:02:53,680
+So technically speaking you should install this yourself in your owner's three bucket because you know
+
+42
+00:02:53,680 --> 00:02:57,880
+you're not supposed to you're supposed to go get it from their website and not from me.
+
+43
+00:02:57,940 --> 00:03:02,580
+That's according to their license agreement but hey secret's safe with me.
+
+44
+00:03:02,600 --> 00:03:07,270
+The are things changed here is the format of that dating of that data file for ratings has also changed
+
+45
+00:03:07,270 --> 00:03:11,790
+it's also delimited by these double colon characters.
+
+46
+00:03:11,850 --> 00:03:17,020
+That's the only change I've made there and one other thing worth pointing out is when I'm creating my
+
+47
+00:03:17,020 --> 00:03:23,590
+spa context notice that my spark conf object is empty I'm not putting anything in here at all for what
+
+48
+00:03:23,590 --> 00:03:29,380
+the Master is or what the name is because instead I'm going to pass that on the command line when I
+
+49
+00:03:29,380 --> 00:03:35,620
+actually run the script on the master and by doing so I can take advantage of some pre configure reconfigured
+
+50
+00:03:35,620 --> 00:03:43,000
+stuff on EMR elastic map reduce that will automatically tell spark to run on top of Hadoop yarn using
+
+51
+00:03:43,000 --> 00:03:45,060
+the cluster that I've created using EMR.
+
+52
+00:03:45,090 --> 00:03:51,040
+So if I were to actually keep my master equals local here it would only run on the master node and that's
+
+53
+00:03:51,040 --> 00:03:52,120
+certainly not what we want.
+
+54
+00:03:52,210 --> 00:03:58,210
+So by leaving that empty it will fall back to the command line arguments and the built in configuration
+
+55
+00:03:58,210 --> 00:04:00,910
+files for spark that Amazon sets up for me.
+
+56
+00:04:00,940 --> 00:04:03,130
+So that's a very important point.
+
+57
+00:04:03,130 --> 00:04:08,710
+If I did not change that I wouldn't really be running on a cluster at all and I wouldn't have very good
+
+58
+00:04:08,710 --> 00:04:10,190
+results.
+
+59
+00:04:10,300 --> 00:04:11,740
+So that's pretty much it.
+
+60
+00:04:11,740 --> 00:04:16,480
+I mean the main difference is here again just to recap or that I've moved my text file to be in the
+
+61
+00:04:16,480 --> 00:04:23,410
+cloud from S3 I have left my SPARC configuration empty and I've changed the format in the file names
+
+62
+00:04:23,410 --> 00:04:29,200
+of the data file to actually account for the differences between movie lenses one million rating data
+
+63
+00:04:29,200 --> 00:04:32,160
+set and the 100000 rating set.
+
+64
+00:04:32,290 --> 00:04:34,900
+So we're just about ready to start spending things up and start playing with it.
+
+65
+00:04:34,900 --> 00:04:43,120
+Everything else is pretty much the same one other note is that the ideas for movies have changed between
+
+66
+00:04:43,120 --> 00:04:46,150
+the 100000 and 1 million movie rating data set.
+
+67
+00:04:46,600 --> 00:04:53,170
+So Star Wars is no longer movie 1850 it's movie 260 and I left myself a little bit of a cheat sheet
+
+68
+00:04:53,170 --> 00:04:57,070
+up here as to how to actually run this on the Cluster when we get there but we'll talk about that more
+
+69
+00:04:57,070 --> 00:04:58,600
+next.
+
+70
+00:04:58,600 --> 00:05:04,090
+All right our code is now ready to run on a cluster on a plastic map reduce using SPARC on multiple
+
+71
+00:05:04,090 --> 00:05:04,600
+machines.
+
+72
+00:05:04,620 --> 00:05:07,440
+So let's go find out how to do that.
+
+73
+00:05:07,510 --> 00:05:09,670
+What do we have to do to run a script on a cluster.
+
+74
+00:05:09,670 --> 00:05:10,350
+Let's find out.
+
+75
+00:00:00,360 --> 00:00:04,710
+Let's have a quick look at our movie similarities script we modified to run on the one million ratings
+
+76
+00:00:04,710 --> 00:00:09,530
+data set for movie lens. We'll cover how we're going to address partitioning, and this new script as well.
+
+77
+00:00:09,540 --> 00:00:11,980
+So let's take a look at that code.
+
+78
+00:00:12,250 --> 00:00:17,550
+OK so let's modify our movie similarity script to actually work on the 1 million rating datasets and
+
+79
+00:00:17,550 --> 00:00:20,180
+make it so it can run in the cloud,
+
+80
+00:00:20,180 --> 00:00:23,950
+on Amazon's elastic map reduce, or any spark cluster for that matter.
+
+81
+00:00:24,000 --> 00:00:30,630
+So if you haven't already, go grab the movie similarities one million python script from the resources
+
+82
+00:00:30,630 --> 00:00:33,360
+for this lecture and save it wherever you want to.
+
+83
+00:00:33,360 --> 00:00:36,780
+It's actually not that important where you say this one, because we're not actually gonna run it on your
+
+84
+00:00:36,780 --> 00:00:43,670
+desktop anyway. You just need to look at it, and know where it is. So open it up, just so we can take a
+
+85
+00:00:43,670 --> 00:00:48,090
+peek and I'll walk you through the stuff that we've actually changed here.
+
+86
+00:00:48,090 --> 00:00:53,010
+Now first of all, we've made some changes so that it uses the 1 million ratings data set from group lens
+
+87
+00:00:53,040 --> 00:00:55,170
+instead of the 100000 ratings data set.
+
+88
+00:00:55,170 --> 00:01:00,930
+So if you want to grab that, go over to grouplens dot org and click on data sets and you'll find it
+
+89
+00:01:00,960 --> 00:01:07,320
+in the movie lens 1 m data set to 1 million rating,s and this is a little bit more current from 2003.
+
+90
+00:01:07,320 --> 00:01:10,070
+But you know still pretty out of date.
+
+91
+00:01:10,190 --> 00:01:14,790
+You know they do have a current dataset that is updated as of this month.
+
+92
+00:01:14,790 --> 00:01:21,490
+But you're going to need a pretty large cluster D to handle the 40 million plus ratings in that dataset.
+
+93
+00:01:21,510 --> 00:01:22,860
+Let's stick with one million for now.
+
+94
+00:01:22,860 --> 00:01:25,470
+Just to keep costs under control if nothing else.
+
+95
+00:01:25,800 --> 00:01:27,390
+Go ahead and download that if you want to.
+
+96
+00:01:27,520 --> 00:01:31,080
+And when you get it you'll see that it's structured a little bit differently, and we need to account
+
+97
+00:01:31,080 --> 00:01:32,010
+for that in our script.
+
+98
+00:01:32,010 --> 00:01:39,460
+So first thing we do. The movie I.D., the movie name lookup table is now in a file called movies
+
+99
+00:01:39,460 --> 00:01:40,450
+dot dat.
+
+100
+00:01:40,470 --> 00:01:46,290
+And what I'm gonna do is make sure that that file exists in the same directory as my script, as my driver
+
+101
+00:01:46,290 --> 00:01:49,290
+script when I'm running this on the master node of my cluster.
+
+102
+00:01:49,290 --> 00:01:54,080
+So the function that just loads up that dictionary of movie ID to movie name is because it's gonna
+
+103
+00:01:54,120 --> 00:01:59,190
+look locally in our current directory for movies.dat and we know that that's actually delimited
+
+104
+00:01:59,190 --> 00:02:03,910
+by this double colon thing now, which is kind of a new format but otherwise it's doing the same thing
+
+105
+00:02:03,910 --> 00:02:05,720
+as before.
+
+106
+00:02:05,900 --> 00:02:08,280
+You don't think the things that have changed.
+
+107
+00:02:08,290 --> 00:02:12,510
+Notice that we're loading the actual ratings data from S3.
+
+108
+00:02:12,520 --> 00:02:18,910
+This is Amazon Simple Storage Service, and that is actually a distributed and redundant data store.
+
+109
+00:02:18,940 --> 00:02:23,140
+So if you are going to be dealing with really big data, often it's data that's going to be living in
+
+110
+00:02:23,140 --> 00:02:26,170
+the cloud itself on some distributed file system.
+
+111
+00:02:26,170 --> 00:02:31,680
+And if you have a HDFS data store you could also have an HDFS URL here if you wanted to.
+
+112
+00:02:31,720 --> 00:02:37,360
+This basically tells spark to go out to Amazon's S3 service with this S3N url, look in the
+
+113
+00:02:37,360 --> 00:02:43,270
+sun dog dash spark bucket that I've created, and under there it knows where to find the large ratings
+
+114
+00:02:43,270 --> 00:02:47,790
+dot that file that I got from the group lens one million ratings data set.
+
+115
+00:02:48,220 --> 00:02:53,680
+So technically speaking, you should install this yourself in your own S3 bucket because you know
+
+116
+00:02:53,680 --> 00:02:57,880
+you're supposed to go get it from their website and not from me.
+
+117
+00:02:57,940 --> 00:03:02,580
+That's according to their license agreement, but hey secret's safe with me.
+
+118
+00:03:02,600 --> 00:03:07,270
+The other thing that changed here is the format of that dating, of that data file for ratings, has also changed,
+
+119
+00:03:07,270 --> 00:03:11,790
+it's also delimited by these double colon characters.
+
+120
+00:03:11,850 --> 00:03:17,020
+That's the only change I've made there. And one other thing worth pointing out is when I'm creating my
+
+121
+00:03:17,020 --> 00:03:23,590
+spark context,  notice that my spark conf object is empty, I'm not putting anything in here at all for what
+
+122
+00:03:23,590 --> 00:03:29,380
+the Master is, or what the name, is because instead, I'm going to pass that on the command line when I
+
+123
+00:03:29,380 --> 00:03:35,620
+actually run the script on the master. And by doing so, I can take advantage of some pre configured
+
+124
+00:03:35,620 --> 00:03:43,000
+stuff on EMR, Elastic Map Reduce, that will automatically tell spark to run on top of Hadoop YARN using
+
+125
+00:03:43,000 --> 00:03:45,060
+the cluster that I've created using EMR.
+
+126
+00:03:45,090 --> 00:03:51,040
+So if I were to actually keep my master equals local here it would only run on the master node.  And that's
+
+127
+00:03:51,040 --> 00:03:52,120
+certainly not what we want.
+
+128
+00:03:52,210 --> 00:03:58,210
+So by leaving that empty it will fall back to the command line arguments and the built in configuration
+
+129
+00:03:58,210 --> 00:04:00,910
+files for spark that Amazon sets up for me.
+
+130
+00:04:00,940 --> 00:04:03,130
+So that's a very important point.
+
+131
+00:04:03,130 --> 00:04:08,710
+If I did not change that, I wouldn't really be running on a cluster at all and I wouldn't have very good
+
+132
+00:04:08,710 --> 00:04:10,190
+results.
+
+133
+00:04:10,300 --> 00:04:11,740
+So that's pretty much it.
+
+134
+00:04:11,740 --> 00:04:16,480
+I mean the main difference is here again just to recap or that I've moved my text file to be in the
+
+135
+00:04:16,480 --> 00:04:23,410
+cloud from S3, I have left my Spark configuration empty and I've changed the format in the file names
+
+136
+00:04:23,410 --> 00:04:29,200
+of the data file to actually account for the differences between movie lenses one million rating data
+
+137
+00:04:29,200 --> 00:04:32,160
+set and the 100000 rating set.
+
+138
+00:04:32,290 --> 00:04:34,900
+So we're just about ready to start spinning things up and start playing with it.
+
+139
+00:04:34,900 --> 00:04:43,120
+Everything else is pretty much the same. One other note is that the ids for movies have changed between
+
+140
+00:04:43,120 --> 00:04:46,150
+the 100000 and 1 million movie rating data set.
+
+141
+00:04:46,600 --> 00:04:53,170
+So Star Wars is no longer movie id 50, it's movie id 260. And I left myself a little bit of a cheat sheet
+
+142
+00:04:53,170 --> 00:04:57,070
+up here as to how to actually run this on the cluster when we get there, but we'll talk about that more
+
+143
+00:04:57,070 --> 00:04:58,600
+next.
+
+144
+00:04:58,600 --> 00:05:04,090
+All right, our code is now ready to run on a cluster on Elastic map reduce using Spark on multiple
+
+145
+00:05:04,090 --> 00:05:04,600
+machines.
+
+146
+00:05:04,620 --> 00:05:07,440
+So let's go find out how to do that.
+
+147
+00:05:07,510 --> 00:05:09,670
+What do we have to do to run a script on a cluster?
+
+148
+00:05:09,670 --> 00:05:10,350
+Let's find out.

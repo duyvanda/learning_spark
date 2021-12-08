@@ -1,0 +1,823 @@
+1
+00:00:00,450 --> 00:00:04,230
+All right, I hope you had some success with that one more of a challenging exercise, but I think it
+
+2
+00:00:04,230 --> 00:00:05,760
+gave you enough hints to be successful.
+
+3
+00:00:06,330 --> 00:00:10,920
+So if you did have trouble with it or you want to verify how you went about it, let's compare your
+
+4
+00:00:10,920 --> 00:00:11,780
+results to mine.
+
+5
+00:00:12,300 --> 00:00:15,900
+So here's my top dash URL's script here that solves the problem.
+
+6
+00:00:16,140 --> 00:00:21,990
+And it is basically identical to the previous activity up to the point where we actually load up the
+
+7
+00:00:21,990 --> 00:00:23,300
+data frame and do stuff with it.
+
+8
+00:00:23,310 --> 00:00:28,290
+So we have the same regular expressions and we're using the same regular regular expressions to extract
+
+9
+00:00:28,290 --> 00:00:33,210
+the various fields of that access, log into a more structured format, into logs, D.F., into our
+
+10
+00:00:33,210 --> 00:00:33,970
+data frame there.
+
+11
+00:00:34,120 --> 00:00:36,580
+So let's pick up down here and see what's going on.
+
+12
+00:00:37,470 --> 00:00:41,610
+So the first thing I did that I mentioned was create this new column called Event Time.
+
+13
+00:00:41,610 --> 00:00:43,230
+That's equal to the current timestamp.
+
+14
+00:00:43,230 --> 00:00:47,340
+So that's going to be populated with the time at which this data was actually ingested.
+
+15
+00:00:47,670 --> 00:00:52,050
+And that is kind of a hack because we're using old access logs here instead of access logs that were
+
+16
+00:00:52,260 --> 00:00:55,710
+just freshly made in the real world, you probably wouldn't have to do this.
+
+17
+00:00:56,340 --> 00:00:59,820
+But now that we have that current event time column there, we can do stuff with it.
+
+18
+00:01:00,150 --> 00:01:02,850
+And here's that window operation that we talked about.
+
+19
+00:01:02,860 --> 00:01:07,320
+So, again, we wanted to set up a 30 second window with a 10 second slide interval.
+
+20
+00:01:07,650 --> 00:01:09,780
+And the format for this would look like this.
+
+21
+00:01:09,960 --> 00:01:14,790
+So we have a new endpoint counts data frame that's constructed with logs down two, which is just the
+
+22
+00:01:14,790 --> 00:01:16,950
+logs data frame with that extra event time column.
+
+23
+00:01:16,950 --> 00:01:17,460
+Add it in.
+
+24
+00:01:17,970 --> 00:01:21,300
+We call function window Funchal event time.
+
+25
+00:01:21,300 --> 00:01:26,400
+So that's going to be the time that we're windowing on with a 30 second window interval and a 10 second
+
+26
+00:01:26,400 --> 00:01:27,150
+slide interval.
+
+27
+00:01:27,540 --> 00:01:31,800
+And then the second argument for the group by function is just the endpoint column because we're trying
+
+28
+00:01:31,800 --> 00:01:33,540
+to group by you URLs.
+
+29
+00:01:33,540 --> 00:01:38,850
+And in the parlance of our code here, the actual URL is the endpoint.
+
+30
+00:01:38,970 --> 00:01:43,110
+So technically, you know, the format here is method that endpoint.
+
+31
+00:01:43,110 --> 00:01:49,470
+So it's going to be like get some URL in some situations, maybe that's not a URL, but for all intents
+
+32
+00:01:49,470 --> 00:01:50,700
+and purposes, for us it is.
+
+33
+00:01:51,120 --> 00:01:51,910
+Then we count them up.
+
+34
+00:01:52,020 --> 00:02:00,030
+So we're just trying to get the count of unique endpoints windowed by that 30 second and 10 second window
+
+35
+00:02:00,030 --> 00:02:03,300
+invalid slide interval based on the event time column.
+
+36
+00:02:03,990 --> 00:02:09,000
+Now that we have that, we can sort it and we just say order by Funchal, count in descending order
+
+37
+00:02:09,240 --> 00:02:12,090
+and then we just display the stream to the console.
+
+38
+00:02:12,090 --> 00:02:18,630
+And to do that, we just say sorted endpoints, count start right stream output mode, complete format,
+
+39
+00:02:18,630 --> 00:02:22,980
+console, query name counts, dot start.
+
+40
+00:02:22,990 --> 00:02:26,940
+So we're just giving that query a name called Counts and then start kicks that off.
+
+41
+00:02:26,950 --> 00:02:31,350
+So it will just start streaming that and running it forever until we actually stop our script.
+
+42
+00:02:31,890 --> 00:02:35,340
+So in going on in this line, it's worth unpacking a little bit here.
+
+43
+00:02:35,340 --> 00:02:39,960
+So again, we're setting up a new query named Accounts that will run forever until we stop it.
+
+44
+00:02:40,350 --> 00:02:45,810
+And that's going to just keep on writing to the stream in complete output mode, to the console the
+
+45
+00:02:45,810 --> 00:02:48,060
+results of sorted endpoint counts.
+
+46
+00:02:48,270 --> 00:02:48,810
+All right.
+
+47
+00:02:49,350 --> 00:02:52,620
+Now, the real world, you probably would not want to just write the output to the console.
+
+48
+00:02:52,620 --> 00:02:53,910
+You probably want to save it somewhere.
+
+49
+00:02:53,910 --> 00:02:54,180
+Right.
+
+50
+00:02:54,180 --> 00:02:58,650
+So instead of the format console, this might be going to a sequel database.
+
+51
+00:02:59,150 --> 00:03:03,840
+You might be getting story to a text file on a distributed file system somewhere, whatever.
+
+52
+00:03:03,840 --> 00:03:06,720
+But you can do all that stuff right here from right stream.
+
+53
+00:03:06,730 --> 00:03:10,980
+So if you just look up the documentation for right stream for Apache Spark, you'll see there's all
+
+54
+00:03:10,980 --> 00:03:13,530
+sorts of possibilities for where you can write it to.
+
+55
+00:03:14,310 --> 00:03:16,590
+So we just go ahead and run that awaiting termination.
+
+56
+00:03:16,590 --> 00:03:19,350
+We just say keep running that query forever until I stop it.
+
+57
+00:03:19,710 --> 00:03:23,130
+And when I finally do stop it, I will stop the session with sparked not stop.
+
+58
+00:03:23,730 --> 00:03:31,170
+So let's see if it works back to my anakonda prompt here and we will call Spark.
+
+59
+00:03:31,420 --> 00:03:38,970
+Oops, Sparks submits on top your URL Stoppie and we'll let that spin up.
+
+60
+00:03:39,390 --> 00:03:43,680
+Now it's not going to do anything at first because right now there's nothing in my logs folder and if
+
+61
+00:03:43,680 --> 00:03:47,670
+there is stuff in your logs folder from the previous activity, then it will go ahead and start to do
+
+62
+00:03:47,670 --> 00:03:48,360
+stuff right away.
+
+63
+00:03:48,360 --> 00:03:50,610
+But for me there isn't because I clean things up.
+
+64
+00:03:51,690 --> 00:03:53,190
+So let's just give that a chance to start.
+
+65
+00:03:53,190 --> 00:03:57,270
+I think it's probably running by now, so let's go ahead and put some laws in there for it to play with.
+
+66
+00:03:58,500 --> 00:04:02,670
+So I'm going to make three copies of my access log here to play with.
+
+67
+00:04:02,670 --> 00:04:07,110
+So I'm just going to control and paste, control and paste, whatever you want to do to copy that to
+
+68
+00:04:07,110 --> 00:04:08,370
+a couple of different file names.
+
+69
+00:04:09,000 --> 00:04:14,790
+So let's start by copying the access log into my logs folder here.
+
+70
+00:04:14,820 --> 00:04:19,110
+And you could do this from a terminal just using the CPP command, obviously, but I'm on windows,
+
+71
+00:04:19,110 --> 00:04:20,640
+so a little bit easier.
+
+72
+00:04:21,930 --> 00:04:26,130
+Let's wait for that to spin up, I can hear my CPU's fans spinning so I know it's doing something.
+
+73
+00:04:35,360 --> 00:04:41,970
+All right, so we can see our top yourself there and we actually have three different slight intervals
+
+74
+00:04:42,050 --> 00:04:42,890
+that we've had already.
+
+75
+00:04:42,950 --> 00:04:45,370
+Let's see if I can hit this again before 30 seconds are up.
+
+76
+00:04:46,490 --> 00:04:47,480
+Put that copy in there.
+
+77
+00:04:53,670 --> 00:04:54,630
+Spin it up again.
+
+78
+00:05:00,820 --> 00:05:05,680
+Not sure I timed that quick enough to actually see overlapping windows there.
+
+79
+00:05:05,740 --> 00:05:08,080
+Yeah, you can see that those those windows expired.
+
+80
+00:05:08,080 --> 00:05:11,180
+So I'm still seeing the same counts for every window there.
+
+81
+00:05:11,320 --> 00:05:12,610
+But feel free to play with this.
+
+82
+00:05:12,610 --> 00:05:17,110
+If you were able to get that quick enough, you should see that basically double for some windows in
+
+83
+00:05:17,110 --> 00:05:20,050
+cases where the windows overlap for different slide intervals.
+
+84
+00:05:20,470 --> 00:05:21,190
+But this is cool.
+
+85
+00:05:21,190 --> 00:05:25,360
+So you can see our data frame here where we're actually printing out that accumulation of different
+
+86
+00:05:25,360 --> 00:05:31,900
+slide intervals for a given 30 second window and giving you those top URLs for each window that encounters.
+
+87
+00:05:32,290 --> 00:05:37,490
+And we're seeing that Zemel, RBC and WP log in are actually the top URLs being hit.
+
+88
+00:05:38,320 --> 00:05:41,800
+Turns out that's because someone was actually trying to attack my website during this time.
+
+89
+00:05:41,920 --> 00:05:47,800
+Someone was actually trying to break into my site by hacking a vulnerability and WordPress and they
+
+90
+00:05:47,800 --> 00:05:51,140
+weren't able to do it, but they were able to slow down my website by hitting it this hard.
+
+91
+00:05:51,160 --> 00:05:56,710
+So this is kind of a real world example of where this sort of analysis in real time could alert me or
+
+92
+00:05:56,710 --> 00:05:59,930
+help me at least diagnose what's going on with my website while it was under attack.
+
+93
+00:06:00,610 --> 00:06:05,320
+So there you have it, spark streaming with windows and window intervals and slight intervals and a
+
+94
+00:06:05,320 --> 00:06:09,340
+little bit of an example of using structured streaming in a more complex manner.
+
+95
+00:06:09,820 --> 00:06:14,380
+And that's basically streaming and spark and structured streaming in a nutshell.
+
+96
+00:06:14,380 --> 00:06:16,540
+I mean, there are some more nuances we could cover.
+
+97
+00:06:16,540 --> 00:06:20,350
+And, you know, there's a whole other course on spark streaming, but that is definitely enough to
+
+98
+00:06:20,350 --> 00:06:21,820
+make you dangerous.
+
+99
+00:06:21,820 --> 00:06:26,700
+And the biggest use case is actually streaming an Apache log data like this.
+
+100
+00:06:26,710 --> 00:06:31,030
+So I think this will be a good, again, tool to have in your tool chest just by keeping the script
+
+101
+00:06:31,030 --> 00:06:32,190
+around for future reference.
+
+102
+00:06:32,650 --> 00:06:34,270
+So there you have sparks streaming.
+
+103
+00:06:34,450 --> 00:06:35,470
+Another thing you've learned.
+
+104
+00:00:00,450 --> 00:00:04,230
+All right, I hope you had some success with that one more of a challenging exercise, but I think it
+
+105
+00:00:04,230 --> 00:00:05,760
+gave you enough hints to be successful.
+
+106
+00:00:06,330 --> 00:00:10,920
+So if you did have trouble with it or you want to verify how you went about it, let's compare your
+
+107
+00:00:10,920 --> 00:00:11,780
+results to mine.
+
+108
+00:00:12,300 --> 00:00:15,900
+So here's my top dash URL's script here that solves the problem.
+
+109
+00:00:16,140 --> 00:00:21,990
+And it is basically identical to the previous activity, up to the point where we actually load up the
+
+110
+00:00:21,990 --> 00:00:23,300
+data frame and do stuff with it.
+
+111
+00:00:23,310 --> 00:00:28,290
+So we have the same regular expressions and we're using the same regular regular expressions to extract
+
+112
+00:00:28,290 --> 00:00:33,210
+the various fields of that access, log into a more structured format, into logs, D.F., into our
+
+113
+00:00:33,210 --> 00:00:33,970
+data frame there.
+
+114
+00:00:34,120 --> 00:00:36,580
+So let's pick up down here and see what's going on.
+
+115
+00:00:37,470 --> 00:00:41,610
+So the first thing I did that I mentioned was create this new column called Event Time.
+
+116
+00:00:41,610 --> 00:00:43,230
+That's equal to the current timestamp.
+
+117
+00:00:43,230 --> 00:00:47,340
+So that's going to be populated with the time at which this data was actually ingested.
+
+118
+00:00:47,670 --> 00:00:52,050
+And that is kind of a hack because we're using old access logs here instead of access logs that were
+
+119
+00:00:52,260 --> 00:00:55,710
+just freshly made in the real world, you probably wouldn't have to do this.
+
+120
+00:00:56,340 --> 00:00:59,820
+But now that we have that current event time column there, we can do stuff with it.
+
+121
+00:01:00,150 --> 00:01:02,850
+And here's that window operation that we talked about.
+
+122
+00:01:02,860 --> 00:01:07,320
+So, again, we wanted to set up a 30 second window with a 10 second slide interval.
+
+123
+00:01:07,650 --> 00:01:09,780
+And the format for this would look like this.
+
+124
+00:01:09,960 --> 00:01:14,790
+So we have a new endpoint counts data frame that's constructed with logs down two, which is just the
+
+125
+00:01:14,790 --> 00:01:16,950
+logs data frame with that extra event time column.
+
+126
+00:01:16,950 --> 00:01:17,460
+Add it in.
+
+127
+00:01:17,970 --> 00:01:21,300
+We call function window Funchal event time.
+
+128
+00:01:21,300 --> 00:01:26,400
+So that's going to be the time that we're windowing on with a 30 second window interval and a 10 second
+
+129
+00:01:26,400 --> 00:01:27,150
+slide interval.
+
+130
+00:01:27,540 --> 00:01:31,800
+And then the second argument for the group by function is just the endpoint column because we're trying
+
+131
+00:01:31,800 --> 00:01:33,540
+to group by you URLs.
+
+132
+00:01:33,540 --> 00:01:38,850
+And in the parlance of our code here, the actual URL is the endpoint.
+
+133
+00:01:38,970 --> 00:01:43,110
+So technically, you know, the format here is method that endpoint.
+
+134
+00:01:43,110 --> 00:01:49,470
+So it's going to be like get some URL in some situations, maybe that's not a URL, but for all intents
+
+135
+00:01:49,470 --> 00:01:50,700
+and purposes, for us it is.
+
+136
+00:01:51,120 --> 00:01:51,910
+Then we count them up.
+
+137
+00:01:52,020 --> 00:02:00,030
+So we're just trying to get the count of unique endpoints windowed by that 30 second and 10 second window
+
+138
+00:02:00,030 --> 00:02:03,300
+invalid slide interval based on the event time column.
+
+139
+00:02:03,990 --> 00:02:09,000
+Now that we have that, we can sort it and we just say order by Funchal, count in descending order
+
+140
+00:02:09,240 --> 00:02:12,090
+and then we just display the stream to the console.
+
+141
+00:02:12,090 --> 00:02:18,630
+And to do that, we just say sorted endpoints, count start right stream output mode, complete format,
+
+142
+00:02:18,630 --> 00:02:22,980
+console, query name counts, dot start.
+
+143
+00:02:22,990 --> 00:02:26,940
+So we're just giving that query a name called Counts and then start kicks that off.
+
+144
+00:02:26,950 --> 00:02:31,350
+So it will just start streaming that and running it forever until we actually stop our script.
+
+145
+00:02:31,890 --> 00:02:35,340
+So in going on in this line, it's worth unpacking a little bit here.
+
+146
+00:02:35,340 --> 00:02:39,960
+So again, we're setting up a new query named Accounts that will run forever until we stop it.
+
+147
+00:02:40,350 --> 00:02:45,810
+And that's going to just keep on writing to the stream in complete output mode, to the console the
+
+148
+00:02:45,810 --> 00:02:48,060
+results of sorted endpoint counts.
+
+149
+00:02:48,270 --> 00:02:48,810
+All right.
+
+150
+00:02:49,350 --> 00:02:52,620
+Now, the real world, you probably would not want to just write the output to the console.
+
+151
+00:02:52,620 --> 00:02:53,910
+You probably want to save it somewhere.
+
+152
+00:02:53,910 --> 00:02:54,180
+Right.
+
+153
+00:02:54,180 --> 00:02:58,650
+So instead of the format console, this might be going to a sequel database.
+
+154
+00:02:59,150 --> 00:03:03,840
+You might be getting story to a text file on a distributed file system somewhere, whatever.
+
+155
+00:03:03,840 --> 00:03:06,720
+But you can do all that stuff right here from right stream.
+
+156
+00:03:06,730 --> 00:03:10,980
+So if you just look up the documentation for right stream for Apache Spark, you'll see there's all
+
+157
+00:03:10,980 --> 00:03:13,530
+sorts of possibilities for where you can write it to.
+
+158
+00:03:14,310 --> 00:03:16,590
+So we just go ahead and run that awaiting termination.
+
+159
+00:03:16,590 --> 00:03:19,350
+We just say keep running that query forever until I stop it.
+
+160
+00:03:19,710 --> 00:03:23,130
+And when I finally do stop it, I will stop the session with sparked not stop.
+
+161
+00:03:23,730 --> 00:03:31,170
+So let's see if it works back to my anakonda prompt here and we will call Spark.
+
+162
+00:03:31,420 --> 00:03:38,970
+Oops, Sparks submits on top your URL Stoppie and we'll let that spin up.
+
+163
+00:03:39,390 --> 00:03:43,680
+Now it's not going to do anything at first because right now there's nothing in my logs folder and if
+
+164
+00:03:43,680 --> 00:03:47,670
+there is stuff in your logs folder from the previous activity, then it will go ahead and start to do
+
+165
+00:03:47,670 --> 00:03:48,360
+stuff right away.
+
+166
+00:03:48,360 --> 00:03:50,610
+But for me there isn't because I clean things up.
+
+167
+00:03:51,690 --> 00:03:53,190
+So let's just give that a chance to start.
+
+168
+00:03:53,190 --> 00:03:57,270
+I think it's probably running by now, so let's go ahead and put some laws in there for it to play with.
+
+169
+00:03:58,500 --> 00:04:02,670
+So I'm going to make three copies of my access log here to play with.
+
+170
+00:04:02,670 --> 00:04:07,110
+So I'm just going to control and paste, control and paste, whatever you want to do to copy that to
+
+171
+00:04:07,110 --> 00:04:08,370
+a couple of different file names.
+
+172
+00:04:09,000 --> 00:04:14,790
+So let's start by copying the access log into my logs folder here.
+
+173
+00:04:14,820 --> 00:04:19,110
+And you could do this from a terminal just using the CPP command, obviously, but I'm on windows,
+
+174
+00:04:19,110 --> 00:04:20,640
+so a little bit easier.
+
+175
+00:04:21,930 --> 00:04:26,130
+Let's wait for that to spin up, I can hear my CPU's fans spinning so I know it's doing something.
+
+176
+00:04:35,360 --> 00:04:41,970
+All right, so we can see our top yourself there and we actually have three different slight intervals
+
+177
+00:04:42,050 --> 00:04:42,890
+that we've had already.
+
+178
+00:04:42,950 --> 00:04:45,370
+Let's see if I can hit this again before 30 seconds are up.
+
+179
+00:04:46,490 --> 00:04:47,480
+Put that copy in there.
+
+180
+00:04:53,670 --> 00:04:54,630
+Spin it up again.
+
+181
+00:05:00,820 --> 00:05:05,680
+Not sure I timed that quick enough to actually see overlapping windows there.
+
+182
+00:05:05,740 --> 00:05:08,080
+Yeah, you can see that those those windows expired.
+
+183
+00:05:08,080 --> 00:05:11,180
+So I'm still seeing the same counts for every window there.
+
+184
+00:05:11,320 --> 00:05:12,610
+But feel free to play with this.
+
+185
+00:05:12,610 --> 00:05:17,110
+If you were able to get that quick enough, you should see that basically double for some windows in
+
+186
+00:05:17,110 --> 00:05:20,050
+cases where the windows overlap for different slide intervals.
+
+187
+00:05:20,470 --> 00:05:21,190
+But this is cool.
+
+188
+00:05:21,190 --> 00:05:25,360
+So you can see our data frame here where we're actually printing out that accumulation of different
+
+189
+00:05:25,360 --> 00:05:31,900
+slide intervals for a given 30 second window and giving you those top URLs for each window that encounters.
+
+190
+00:05:32,290 --> 00:05:37,490
+And we're seeing that Zemel, RBC and WP log in are actually the top URLs being hit.
+
+191
+00:05:38,320 --> 00:05:41,800
+Turns out that's because someone was actually trying to attack my website during this time.
+
+192
+00:05:41,920 --> 00:05:47,800
+Someone was actually trying to break into my site by hacking a vulnerability and WordPress and they
+
+193
+00:05:47,800 --> 00:05:51,140
+weren't able to do it, but they were able to slow down my website by hitting it this hard.
+
+194
+00:05:51,160 --> 00:05:56,710
+So this is kind of a real world example of where this sort of analysis in real time could alert me or
+
+195
+00:05:56,710 --> 00:05:59,930
+help me at least diagnose what's going on with my website while it was under attack.
+
+196
+00:06:00,610 --> 00:06:05,320
+So there you have it, spark streaming with windows and window intervals and slight intervals and a
+
+197
+00:06:05,320 --> 00:06:09,340
+little bit of an example of using structured streaming in a more complex manner.
+
+198
+00:06:09,820 --> 00:06:14,380
+And that's basically streaming and spark and structured streaming in a nutshell.
+
+199
+00:06:14,380 --> 00:06:16,540
+I mean, there are some more nuances we could cover.
+
+200
+00:06:16,540 --> 00:06:20,350
+And, you know, there's a whole other course on spark streaming, but that is definitely enough to
+
+201
+00:06:20,350 --> 00:06:21,820
+make you dangerous.
+
+202
+00:06:21,820 --> 00:06:26,700
+And the biggest use case is actually streaming an Apache log data like this.
+
+203
+00:06:26,710 --> 00:06:31,030
+So I think this will be a good, again, tool to have in your tool chest just by keeping the script
+
+204
+00:06:31,030 --> 00:06:32,190
+around for future reference.
+
+205
+00:06:32,650 --> 00:06:34,270
+So there you have sparks streaming.
+
+206
+00:06:34,450 --> 00:06:35,470
+Another thing you've learned.

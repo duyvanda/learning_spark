@@ -1,0 +1,595 @@
+1
+00:00:00,510 --> 00:00:05,040
+Ok real quick let's go through how to get set up on Amazon Web Services and create an account that you
+
+2
+00:00:05,040 --> 00:00:10,980
+can use to spin up your own plastic map reduce cluster for running spark jobs on the Cluster.
+
+3
+00:00:10,980 --> 00:00:15,480
+We'll also talk about how you can connect to that cluster because going forward you're not going to
+
+4
+00:00:15,480 --> 00:00:18,910
+be running your spark drive or scripts on your desktop anymore.
+
+5
+00:00:19,140 --> 00:00:23,400
+You're going to be running them from a master node on an easy to Linux instance in the cloud.
+
+6
+00:00:23,490 --> 00:00:27,900
+So you're going to have to be able to connect to that easy to instance from your desktop.
+
+7
+00:00:27,900 --> 00:00:31,260
+Let's go over how to do that on Windows now all right.
+
+8
+00:00:31,260 --> 00:00:35,370
+So to get started with Amazon Web Services first we're gonna walk you through how to create an account
+
+9
+00:00:35,370 --> 00:00:37,130
+on NWS if you haven't already.
+
+10
+00:00:37,140 --> 00:00:42,000
+Just a quick pointer of where to go there and when we're done we're gonna figure out how to actually
+
+11
+00:00:42,000 --> 00:00:47,760
+connect to the instances that we might be spinning up on Web services so when we actually create a cluster
+
+12
+00:00:47,760 --> 00:00:53,010
+for SPARC we need a way to actually log into the master node on that cluster and actually run our script
+
+13
+00:00:53,010 --> 00:00:53,250
+there.
+
+14
+00:00:53,280 --> 00:00:59,280
+So to do so we need to get our credentials for logging into any instances that our SPARC cluster spins
+
+15
+00:00:59,280 --> 00:01:02,100
+up and we'll also set up a terminal.
+
+16
+00:01:02,100 --> 00:01:08,490
+If you're on Windows called putty and go through how to actually use that to connect to your instances.
+
+17
+00:01:08,530 --> 00:01:12,210
+So we walk you through that right now okay.
+
+18
+00:01:12,240 --> 00:01:17,320
+Let's go through how to set up an Amazon Web Services account if you need one and get started with an
+
+19
+00:01:17,340 --> 00:01:22,570
+elastic map produce and also figure out how to connect to our instances on a classic map reduce.
+
+20
+00:01:22,590 --> 00:01:27,710
+So again you know if you don't want to risk spending money you're gonna need some.
+
+21
+00:01:27,720 --> 00:01:31,200
+You're gonna need a credit card number to sign up for an account here it's gonna cost some real money
+
+22
+00:01:31,350 --> 00:01:32,490
+and it can actually add up.
+
+23
+00:01:32,490 --> 00:01:34,010
+So if you do just want to watch.
+
+24
+00:01:34,020 --> 00:01:39,390
+That's OK but if you want to follow along feel free just make sure that you're careful to shut down
+
+25
+00:01:39,390 --> 00:01:43,350
+and terminate any clusters that you spin up in the course of this course or else you're gonna rack up
+
+26
+00:01:43,350 --> 00:01:47,910
+a pretty significant bill and you get a sense of the current pricing you can click on the pricing tab
+
+27
+00:01:47,910 --> 00:01:54,230
+up here and go to products and services and look at easy to the Elastic Compute Cloud because that's
+
+28
+00:01:54,230 --> 00:02:00,150
+the primary costs of our clusters that will be spending up is just renting time on these computers.
+
+29
+00:02:00,150 --> 00:02:03,460
+And if you scroll down you can see what individual types of instances cost.
+
+30
+00:02:03,530 --> 00:02:11,060
+Now by default a EMR cluster for SPARC is going to spin up M3 X large instances and these are for you
+
+31
+00:02:11,660 --> 00:02:13,610
+15 gigabyte apiece instances.
+
+32
+00:02:13,610 --> 00:02:20,290
+So these are very beefy and twenty six cents per hour it may not sound like much but it can add up.
+
+33
+00:02:20,300 --> 00:02:20,580
+Okay.
+
+34
+00:02:20,600 --> 00:02:25,750
+I mean that's actually a very reasonable rate for a computer that that powerful I'll grant them that.
+
+35
+00:02:25,760 --> 00:02:30,290
+But if you're running 10 of these things in a cluster all of a sudden that's two dollars and 60 cents
+
+36
+00:02:30,290 --> 00:02:35,180
+per hour and if you're running 10 of these for 10 hours then you're now up to twenty six dollars.
+
+37
+00:02:35,180 --> 00:02:35,510
+Right.
+
+38
+00:02:35,510 --> 00:02:40,760
+So you've got to be careful that you shut these things down when you're done because they can add up
+
+39
+00:02:40,760 --> 00:02:44,540
+quickly if you were to run that for a whole month and not even realize it and just get the bill at the
+
+40
+00:02:44,540 --> 00:02:44,770
+end.
+
+41
+00:02:44,780 --> 00:02:46,640
+I don't even want to think about how much money that would be.
+
+42
+00:02:46,640 --> 00:02:53,090
+So do exercise caution if you're going to do this yourself but if you are confident in your ability
+
+43
+00:02:53,090 --> 00:02:58,910
+to shut things down when you're done and you have you know some extra money to spend by all means sign
+
+44
+00:02:58,910 --> 00:03:04,520
+up here and follow along with me otherwise let me incur the expense like I said I ran up about 30 dollars
+
+45
+00:03:04,520 --> 00:03:05,930
+in the course of developing this course.
+
+46
+00:03:05,930 --> 00:03:07,840
+So there you have it.
+
+47
+00:03:07,880 --> 00:03:13,070
+He made an account just click on the sign into the console link here up in the corner and I'm already
+
+48
+00:03:13,070 --> 00:03:17,810
+in there but if I wasn't already logged in you would see a screen that would allow you to either enter
+
+49
+00:03:17,810 --> 00:03:20,180
+your username and password or create a new one.
+
+50
+00:03:20,270 --> 00:03:24,650
+And at that point you could say create new account and it would ask you for all of your personal information
+
+51
+00:03:24,650 --> 00:03:29,870
+and credit card information and it would actually call you as part of a two factor authentication process
+
+52
+00:03:29,870 --> 00:03:33,830
+to make sure that you are who you are and after you get through all of that stuff which I won't bore
+
+53
+00:03:33,830 --> 00:03:40,110
+you with making you watch you should be eventually at a screen that looks like this which is the AWOL
+
+54
+00:03:40,160 --> 00:03:40,820
+console.
+
+55
+00:03:40,820 --> 00:03:45,350
+And if you need to get to it it's always available through this little cube icon here.
+
+56
+00:03:45,380 --> 00:03:46,720
+OK.
+
+57
+00:03:46,910 --> 00:03:52,880
+Now we're going to be doing a lot of work with EMR the elastic map reduce product from Amazon Web Services
+
+58
+00:03:52,880 --> 00:03:58,040
+and it's not just mass produced it's actually a managed Hadoop framework so it spins up a Hadoop cluster
+
+59
+00:03:58,040 --> 00:03:58,880
+for you.
+
+60
+00:03:58,990 --> 00:04:01,390
+And that actually includes SPARC as well.
+
+61
+00:04:01,390 --> 00:04:07,580
+So EMR it's not just for map produce anymore you can actually use the yarn component of Hadoop as a
+
+62
+00:04:07,580 --> 00:04:10,900
+cluster manager that spark runs on top of.
+
+63
+00:04:11,060 --> 00:04:17,210
+And by just kicking off an EMR cluster an Amazon Web Services you can very quickly get a master node
+
+64
+00:04:17,210 --> 00:04:23,090
+and as many client you know slave nodes as you want for the job that you have at hand and maybe one
+
+65
+00:04:23,090 --> 00:04:23,620
+is all you need.
+
+66
+00:04:23,620 --> 00:04:28,100
+Given that you have four cores and a pretty powerful computer but it gives you everything you need it
+
+67
+00:04:28,100 --> 00:04:32,090
+deploys all the software you need automatically so all you have to do is log into your master node on
+
+68
+00:04:32,090 --> 00:04:37,430
+the Cluster copy your script there and make sure any data that it needs is accessible to it and run
+
+69
+00:04:37,430 --> 00:04:37,730
+it.
+
+70
+00:04:37,910 --> 00:04:38,740
+And that's it.
+
+71
+00:04:38,750 --> 00:04:39,910
+So it's very easy to use.
+
+72
+00:04:40,520 --> 00:04:44,380
+But first you need a way to actually connect to those instances.
+
+73
+00:04:44,430 --> 00:04:49,780
+Once you've spun them up and to do so you're gonna need log in authentication credentials.
+
+74
+00:04:49,820 --> 00:04:54,740
+So to do that you're going to need to get a private and public key pair that you can use for signing
+
+75
+00:04:54,740 --> 00:04:57,830
+in to your EMR cluster.
+
+76
+00:04:58,070 --> 00:05:01,310
+So click on the easy to service here.
+
+77
+00:05:01,310 --> 00:05:06,830
+Easy to is the elastic compute cloud which is the underlying service that EMR uses to actually spin
+
+78
+00:05:06,830 --> 00:05:09,740
+up the different computers in the cluster.
+
+79
+00:05:09,740 --> 00:05:13,360
+So click on easy to meanwhile click on key pairs.
+
+80
+00:05:13,580 --> 00:05:20,320
+Over here and from here you want to click Create Cupid keep hair and name it something you'll remember
+
+81
+00:05:21,160 --> 00:05:23,420
+I already created one called Sparky.
+
+82
+00:05:23,890 --> 00:05:25,870
+So you might want to call it the same thing.
+
+83
+00:05:25,870 --> 00:05:32,920
+And when you hit create it will download to your Downloads folder a spark keyboard PCM file which contains
+
+84
+00:05:32,920 --> 00:05:35,410
+your public and private key pair.
+
+85
+00:05:35,410 --> 00:05:40,000
+Make sure you actually download that file and keep it somewhere safe and back it up somewhere because
+
+86
+00:05:40,000 --> 00:05:43,000
+once you've downloaded it here you can never get it again.
+
+87
+00:05:43,170 --> 00:05:43,680
+OK.
+
+88
+00:05:43,780 --> 00:05:45,670
+You can always create a new one if you need to.
+
+89
+00:05:45,880 --> 00:05:51,640
+But for security reasons they make it impossible to actually re download your public and private key.
+
+90
+00:05:51,640 --> 00:05:55,150
+And that's in case somebody breaks into your Ada U.S. console account.
+
+91
+00:05:55,150 --> 00:05:59,140
+They don't want them to be able to gain the credentials to actually get into all of the computers on
+
+92
+00:05:59,140 --> 00:06:01,260
+your cluster and rack up a big bill for you.
+
+93
+00:06:02,290 --> 00:06:08,620
+So I've already done that and downloaded it into my smart course folder and I have a spark kit OPM file
+
+94
+00:06:08,620 --> 00:06:09,970
+there.
+
+95
+00:06:09,970 --> 00:06:15,040
+And if you need if you're on Windows you're also going to need some sort of terminal application so
+
+96
+00:06:15,040 --> 00:06:20,140
+you can log into your master node on the cloud and actually get your scripts there and run them and
+
+97
+00:06:20,230 --> 00:06:25,270
+I recommend a program called putty that you can search for if you need a terminal for window and you
+
+98
+00:06:25,270 --> 00:06:27,240
+don't have it already.
+
+99
+00:06:27,280 --> 00:06:32,740
+It will bring you to a Web site that looks like this not very fancy and putting itself isn't very fancy
+
+100
+00:06:32,740 --> 00:06:38,620
+either but it works and you can either install the full Windows Installer here or you can just install
+
+101
+00:06:38,620 --> 00:06:39,610
+the pieces you need.
+
+102
+00:06:39,610 --> 00:06:44,740
+The only parts you actually need are putting it out EMC which is the terminal application itself and
+
+103
+00:06:44,740 --> 00:06:50,170
+putty Gen Daddy XY which we're going to need to convert our APM file that contains our public private
+
+104
+00:06:50,170 --> 00:06:53,620
+key pair to a PPA file that putty can use.
+
+105
+00:06:53,620 --> 00:06:59,260
+So I've already done that and downloaded them into my SPARC course folder hit pause if you need to do
+
+106
+00:06:59,260 --> 00:07:00,700
+the same.
+
+107
+00:07:00,820 --> 00:07:08,560
+And once you have that you can open up putty agenda EMC and click on load which you need to do is change
+
+108
+00:07:08,560 --> 00:07:17,080
+this dropdown for the file filter to all files and select your spark keyed up PCM file and it will load
+
+109
+00:07:17,080 --> 00:07:22,720
+that in in order to save it as a p p k file that putty can actually use.
+
+110
+00:07:22,720 --> 00:07:24,550
+You now need to save it as a private key.
+
+111
+00:07:24,550 --> 00:07:30,700
+I'm going to leave the key if the key passphrase empty because it just makes life a lot more complicated
+
+112
+00:07:30,700 --> 00:07:33,390
+when you're actually trying to use this this key file.
+
+113
+00:07:33,550 --> 00:07:37,450
+And as long as you have know good physical security for your desktop I wouldn't worry about it too much
+
+114
+00:07:37,720 --> 00:07:39,660
+if it does make you more comfortable to have a passphrase.
+
+115
+00:07:39,670 --> 00:07:43,390
+Put one in but you know it's not as necessary as you might think.
+
+116
+00:07:43,420 --> 00:07:47,560
+So I'm gonna click on save private key is going to say I don't have a passphrase but yeah that's that's
+
+117
+00:07:47,560 --> 00:07:50,760
+fine by me and I will save it a spark heat up.
+
+118
+00:07:50,860 --> 00:07:52,810
+I've already done this before so I already have one.
+
+119
+00:07:52,810 --> 00:07:59,470
+So I'm just gonna overwrite the one that I have and at that point you have a spark keyed up K file that
+
+120
+00:07:59,470 --> 00:08:04,070
+will let you log into any cluster that you spin up using the spark key.
+
+121
+00:08:04,210 --> 00:08:06,440
+Keep hair later on.
+
+122
+00:08:06,940 --> 00:08:12,430
+Now to actually use that PPA file within putty to open up putty itself and when you actually spin up
+
+123
+00:08:12,430 --> 00:08:16,510
+your cluster you'll get back a hostname that you can use to actually log into the master note of your
+
+124
+00:08:16,510 --> 00:08:17,230
+spa cluster.
+
+125
+00:08:17,230 --> 00:08:23,080
+But the first thing you'll want to do is go to the SSA tab here open it up and click on off and here
+
+126
+00:08:23,080 --> 00:08:26,400
+you'll select your K file.
+
+127
+00:08:26,410 --> 00:08:34,630
+And once you have that you can just enter in the hostname of the master node of your cluster and you
+
+128
+00:08:34,630 --> 00:08:38,550
+can log in automatically without having to sign in with the username and password.
+
+129
+00:08:38,710 --> 00:08:40,360
+And that's actually more secure that way.
+
+130
+00:08:40,360 --> 00:08:48,130
+So there you have it you have an EMR elastic map reduce Amazon Web Services account ready to go and
+
+131
+00:08:48,130 --> 00:08:52,840
+you have a terminal ready and able to connect to that cluster as soon as you spin it up.
+
+132
+00:08:52,840 --> 00:08:57,430
+So we want to make sure we have all these pieces in place beforehand because again time is money on
+
+133
+00:08:57,430 --> 00:09:00,750
+that cluster once we spin it up and we want to have everything we need ready to go.
+
+134
+00:09:00,760 --> 00:09:03,670
+So we are now at that point.
+
+135
+00:09:03,760 --> 00:09:04,330
+All right.
+
+136
+00:09:04,330 --> 00:09:08,120
+Now you have everything you need to spin up a cluster and connect to it.
+
+137
+00:09:08,170 --> 00:09:13,180
+I'm not going to connect to it just yet though because as soon as I spin up that cluster the clock starts
+
+138
+00:09:13,180 --> 00:09:16,140
+ticking and my bill is going to start getting run up.
+
+139
+00:09:16,360 --> 00:09:21,310
+We'll wait until the last second to do that because like I mentioned before this really costs money
+
+140
+00:09:21,520 --> 00:09:26,050
+and you should be very very careful if you're going to be running these clusters yourself if you forgot
+
+141
+00:09:26,050 --> 00:09:30,550
+to shut them down when you're done if you forget to terminate them you're going to get a very big bill
+
+142
+00:09:30,550 --> 00:09:34,990
+at the end of the month that bill is going to be a lot bigger than the cost for this course.
+
+143
+00:09:34,990 --> 00:09:39,940
+So I cannot caution you enough to be careful when you're experimenting with EMR and running SPARC in
+
+144
+00:09:39,940 --> 00:09:45,860
+the cloud so don't leave those instances running for that reason you might want to consider just watching
+
+145
+00:09:45,860 --> 00:09:48,530
+and following along with the videos here for now.
+
+146
+00:09:48,530 --> 00:09:53,420
+But if you do choose to follow along with me and do these activities hands on please just remember to
+
+147
+00:09:53,420 --> 00:09:56,020
+terminate your clusters when you're done OK.
+
+148
+00:09:56,030 --> 00:09:57,110
+With that final warning.
+
+149
+00:09:57,200 --> 00:09:57,860
+Let's move on.

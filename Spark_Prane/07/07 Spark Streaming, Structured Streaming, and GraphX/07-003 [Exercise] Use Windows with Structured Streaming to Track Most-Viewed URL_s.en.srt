@@ -1,0 +1,387 @@
+1
+00:00:01,590 --> 00:00:05,640
+So spark streaming and structured streaming is definitely an important thing to know with Apache
+
+2
+00:00:05,640 --> 00:00:09,710
+Spark its a very popular thing to do, especially when you're investing log data in real time.
+
+3
+00:00:09,720 --> 00:00:12,690
+So I'm going to give you a chance to actually practice this yourself.
+
+4
+00:00:13,080 --> 00:00:18,150
+Your exercise this time will be to use the same access log that we used in the previous activity.
+
+5
+00:00:18,540 --> 00:00:23,910
+But I want you to stream the top URLs seen within the past 30 seconds.
+
+6
+00:00:24,010 --> 00:00:26,280
+OK, so that's a little bit of a twist on things.
+
+7
+00:00:26,760 --> 00:00:32,130
+Now, to get that past 30 seconds bid as opposed to since the beginning of time, you need to understand
+
+8
+00:00:32,130 --> 00:00:33,270
+something called windowing.
+
+9
+00:00:33,940 --> 00:00:35,480
+Now, a windowed operation.
+
+10
+00:00:35,520 --> 00:00:38,790
+We talked about this with D streams with this also applies to structured streaming.
+
+11
+00:00:39,030 --> 00:00:40,910
+It looks back over some period of time.
+
+12
+00:00:41,400 --> 00:00:45,390
+So, for example, you could consider only events that happened in the past 10 minutes.
+
+13
+00:00:45,400 --> 00:00:48,060
+In that case, 10 minutes would be the window.
+
+14
+00:00:48,540 --> 00:00:53,340
+There's also a concept of a slide interview and that defines how often you're evaluating a window.
+
+15
+00:00:53,370 --> 00:00:57,770
+So, for example, you could have a ten minute window and a slide interval of five minutes.
+
+16
+00:00:57,780 --> 00:01:03,270
+So every five minutes we would look at the current 10 minute interval of the window and re-evaluate
+
+17
+00:01:03,270 --> 00:01:03,470
+that.
+
+18
+00:01:03,480 --> 00:01:08,850
+So the slide is just how often do we re-evaluate things and start reevaluating our windows.
+
+19
+00:01:09,150 --> 00:01:12,900
+And the window time is that period at which we analyze data within.
+
+20
+00:01:14,070 --> 00:01:15,580
+It makes more sense with an example.
+
+21
+00:01:15,600 --> 00:01:21,210
+So this is coming straight from the Apache Spark documentation here, but it's a good illustrative example.
+
+22
+00:01:21,210 --> 00:01:26,430
+So imagine you have a stream of input data that just has a stream of animal names coming in, cats and
+
+23
+00:01:26,430 --> 00:01:27,830
+dogs and owls and whatnot.
+
+24
+00:01:28,500 --> 00:01:34,230
+So imagine, if you will, we start the stream at 12 o'clock and at 12 02 we get cat dog and a 12 or
+
+25
+00:01:34,240 --> 00:01:35,330
+three we got dog, dog.
+
+26
+00:01:36,090 --> 00:01:41,790
+So let's imagine, if you will, that we have 10 minute windows and we have a five minute slide like
+
+27
+00:01:41,790 --> 00:01:42,480
+we talked about.
+
+28
+00:01:43,300 --> 00:01:48,610
+So the first slide rule that will hit will be 12:05, but that will reside within our first 10 minute
+
+29
+00:01:48,610 --> 00:01:51,300
+window that runs from 12 o'clock to 12:10.
+
+30
+00:01:51,880 --> 00:01:53,290
+So a 12:05 our slide
+
+31
+00:01:53,290 --> 00:01:58,560
+interval gets hit and we say, OK, within this 10 minute window that I'm in, what's our current status?
+
+32
+00:01:58,570 --> 00:02:03,640
+And at this point, we have one cat and three dogs that have been received so far, 12:07.
+
+33
+00:02:03,640 --> 00:02:04,840
+We see an owl and a cat.
+
+34
+00:02:05,170 --> 00:02:10,270
+So a 12:10, another slight interval gets hit and we're still in that 12 o'clock to 12:10 window
+
+35
+00:02:10,270 --> 00:02:10,650
+here.
+
+36
+00:02:10,960 --> 00:02:13,420
+But now we have more data within that window that's come in.
+
+37
+00:02:13,780 --> 00:02:16,450
+So now we have two cats, three dogs and one owl.
+
+38
+00:02:16,900 --> 00:02:21,430
+But we're also within another new window that goes from 12:05 to 12:15.
+
+39
+00:02:21,700 --> 00:02:24,160
+And in that window, we just have one cat and one owl.
+
+40
+00:02:24,580 --> 00:02:27,370
+Now, keep in mind, these results are stored within a data frame.
+
+41
+00:02:27,370 --> 00:02:31,600
+So the way structured streaming works again is that we just have this data frame that keeps growing
+
+42
+00:02:31,600 --> 00:02:32,110
+forever.
+
+43
+00:02:32,320 --> 00:02:34,040
+And that's true with Windows as well.
+
+44
+00:02:34,050 --> 00:02:40,360
+So we're going to have this growing data frame that consists of every possible window with every possible
+
+45
+00:02:40,360 --> 00:02:44,290
+slight interval over time, and it just keeps piling up forever and forever.
+
+46
+00:02:44,980 --> 00:02:45,340
+All right.
+
+47
+00:02:45,400 --> 00:02:49,470
+Moving on with the example, say, a 12:11 and 12:13, we get a dog and an owl.
+
+48
+00:02:49,810 --> 00:02:51,970
+Our next slide interval hits a 12:15.
+
+49
+00:02:52,390 --> 00:02:58,420
+And now we have three windows that we've looked at, 12 o'clock to 12:10, 12:05 to 12:15 and
+
+50
+00:02:58,420 --> 00:02:59,700
+12:10 to 12: 20.
+
+51
+00:03:00,100 --> 00:03:05,110
+And at this point, you can see that we've added in that extra dog and owl to both the 12: 05 to
+
+52
+00:03:05,110 --> 00:03:10,000
+12:15 window and also to the new 12:10 to 12:20 window that's just starting to take shape.
+
+53
+00:03:10,550 --> 00:03:14,500
+So hopefully that makes it a little bit more clear of how windows work and how slight intervals work
+
+54
+00:03:14,500 --> 00:03:15,850
+and how they interact with each other.
+
+55
+00:03:16,870 --> 00:03:19,630
+Your challenge is to apply that to this problem.
+
+56
+00:03:20,050 --> 00:03:22,840
+A little bit of a snippet of how that would work in code.
+
+57
+00:03:23,260 --> 00:03:28,030
+So if you wanted to implement that previous example with a ten minute window and a five minute slide
+
+58
+00:03:28,030 --> 00:03:31,390
+duration, the code itself might look something like this.
+
+59
+00:03:31,780 --> 00:03:36,340
+We might be doing something like data set, not group by func dot window.
+
+60
+00:03:36,610 --> 00:03:38,020
+We're going to find that window here.
+
+61
+00:03:38,320 --> 00:03:43,120
+Func dot col, time stamp column name, whatever it is that you're looking at for the time stamp that you're
+
+62
+00:03:43,120 --> 00:03:48,600
+basing those windows on, window duration equals whatever it is, duration equals whatever it is.
+
+63
+00:03:49,060 --> 00:03:56,170
+So that window scale function can be used to actually do windowed streaming operations within a data
+
+64
+00:03:56,170 --> 00:03:56,530
+frame.
+
+65
+00:03:57,040 --> 00:04:01,960
+And furthermore, we have to pass in the column that we're grouping by,that's just another parameter
+
+66
+00:04:01,960 --> 00:04:04,300
+for the group by function, not the window function there.
+
+67
+00:04:04,870 --> 00:04:08,530
+But you can see there the syntax and you'll want to make note of this because you're going to need that
+
+68
+00:04:08,530 --> 00:04:09,570
+in this exercise.
+
+69
+00:04:10,030 --> 00:04:14,000
+So again, your challenge here is to modify the structured streaming script.
+
+70
+00:04:14,110 --> 00:04:19,720
+Why is that hard to say that we did in the previous activity to keep track of the most viewed URLs in
+
+71
+00:04:19,720 --> 00:04:20,470
+our logs.
+
+72
+00:04:20,470 --> 00:04:21,850
+And normally that would be easy.
+
+73
+00:04:21,850 --> 00:04:25,240
+But that window twist is going to make it a little bit more challenging for you.
+
+74
+00:04:25,540 --> 00:04:31,690
+And I want you to compute this with a 30 second window, with a 10 second slide, some useful snippets
+
+75
+00:04:31,690 --> 00:04:33,220
+of code if you want to cheat a little bit.
+
+76
+00:04:33,790 --> 00:04:38,040
+First of all, here's the group by and window format that you'll need to set that up.
+
+77
+00:04:38,530 --> 00:04:43,960
+And another problem is going to be that we don't really have a useful timestamp function in that access
+
+78
+00:04:43,960 --> 00:04:44,530
+log data.
+
+79
+00:04:44,800 --> 00:04:46,990
+This is a old access log from years ago.
+
+80
+00:04:46,990 --> 00:04:50,440
+So you don't want to be using that as what, your windowing by.
+
+81
+00:04:50,440 --> 00:04:50,780
+Right.
+
+82
+00:04:51,280 --> 00:04:56,590
+So instead we can fabricate a new column called Event Time that contains the current timestamp.
+
+83
+00:04:56,590 --> 00:05:01,900
+So that will populate that eventTime column with whatever time that log data was ingested in.
+
+84
+00:05:01,900 --> 00:05:04,660
+So that will be more useful for experimentation purposes.
+
+85
+00:05:05,140 --> 00:05:09,820
+Normally, if you're actually streaming in data in real time, you'll have you'll be able to use whatever
+
+86
+00:05:09,820 --> 00:05:10,810
+time is in the logs.
+
+87
+00:05:10,810 --> 00:05:14,680
+But in this case, since we're using old logs, we have to fudge things a little bit.
+
+88
+00:05:14,680 --> 00:05:20,110
+So you'll find that line of code quite useful for fabricating an event time column that you can then
+
+89
+00:05:20,110 --> 00:05:21,550
+use on that window function.
+
+90
+00:05:22,510 --> 00:05:28,210
+And finally, when you're done, you'll want to order the endpoint counts by the count column and dot
+
+91
+00:05:28,210 --> 00:05:31,510
+descending is the format for doing that in descending order.
+
+92
+00:05:31,540 --> 00:05:33,070
+So I don't think we've covered that before.
+
+93
+00:05:33,640 --> 00:05:34,770
+So have at it guys.
+
+94
+00:05:34,780 --> 00:05:38,470
+And again, we've kind of worked you up to more challenging examples here.
+
+95
+00:05:38,470 --> 00:05:41,680
+You will need to do a little bit more research, a little bit more creative thinking for this one than
+
+96
+00:05:41,680 --> 00:05:43,300
+before, but I think you're up to it.
+
+97
+00:05:43,490 --> 00:05:48,250
+So have a go at it and we'll come back in the next lecture and I'll show you my solution.

@@ -1,0 +1,6 @@
+
+005 Apache-Spark
+https://spark.apache.org/downloads.html
+
+005 JDK
+http://www.oracle.com/technetwork/java/javase/downloads/index.html
